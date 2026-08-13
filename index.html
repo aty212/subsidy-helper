@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="補助小幫手" />
   <title>補助小幫手 — 找到適合你的社會補助</title>
+  <!-- iOS 主畫面圖示（黃底+星星，SVG inline base64） -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjVjNTE4Ii8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI5NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNlcmlmIj7inIc8L3RleHQ+PC9zdmc+" />
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjVjNTE4Ii8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI5NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNlcmlmIj7inIc8L3RleHQ+PC9zdmc+" type="image/svg+xml" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -890,30 +893,44 @@ function openDetailModal(idx) {
     <div class="info-block"><h3>需備文件</h3>
     <div style="margin-top:6px">${item.docs.map(t=>`<span class="doc-chip">${t}</span>`).join('')}</div></div>`;
 
-  // 地圖 tab：動態組建（帶入申請地點關鍵字）
+  // 地圖 tab：動態組建
   const officeKeywords = item.offices.map(o => o.name).filter(n => !n.startsWith('☎') && !n.startsWith('https'));
+  const mapSearchQuery = item.name + ' ' + (officeKeywords[0] || '公所社會課') + ' 台灣';
   document.getElementById('tab-map').innerHTML = `
     <div class="map-info-banner">
-      💡 偵測你的位置後，會自動找到距離最近的<strong>申請辦理地點</strong>並提供導航
+      💡 點下方按鈕，直接在 Google Maps 搜尋<strong>最近的申辦地點</strong>
     </div>
-    <button class="map-locate-btn" id="btn-locate" onclick="locateAndNavigate(${JSON.stringify(officeKeywords)})">
+    <button class="map-locate-btn" id="btn-locate"
+      onclick="locateAndNavigate(${JSON.stringify(officeKeywords)}, ${JSON.stringify(mapSearchQuery)})">
       📍 偵測位置，找最近辦理地點
+    </button>
+    <button class="map-locate-btn"
+      style="background:var(--yellow-soft);color:var(--text2);margin-top:-6px;border:1.5px solid var(--border2)"
+      onclick="openGoogleMapsSearch(${JSON.stringify(mapSearchQuery)})">
+      🔍 直接在 Google Maps 搜尋
     </button>
     <div id="map-status" class="map-status" style="display:none"></div>
     <div id="map-nearest"></div>
-    <div id="map-container" style="display:none">
-      <iframe id="map-iframe" width="100%" height="280" style="border:0;display:block"
-        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src=""></iframe>
-    </div>
-    <div class="info-block" style="margin-top:12px"><h3>洽辦地點一覽</h3>
-    ${item.offices.map(o=>`
-      <div class="office-card" style="cursor:pointer" onclick="openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">
+    <div class="info-block" style="margin-top:12px"><h3>洽辦地點</h3>
+    ${item.offices.map(o => {
+      const isPhone = o.addr.startsWith('☎');
+      const isUrl   = o.addr.startsWith('http');
+      return `
+      <div class="office-card">
         <strong>${o.name}</strong><span>${o.addr}</span>
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <button class="map-nav-btn" onclick="event.stopPropagation();openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">🗺️ 開啟導航</button>
-          <button class="map-nav-btn" style="background:var(--yellow-soft)" onclick="event.stopPropagation();showOnEmbed('${o.name.replace(/'/g,"\\'")}')">📌 在地圖預覽</button>
-        </div>
-      </div>`).join('')}</div>`;
+        ${!isPhone && !isUrl ? `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="map-nav-btn"
+            onclick="openGoogleMapsSearch('${o.name.replace(/'/g,"\\'")} 台灣')">
+            🔍 在地圖搜尋
+          </button>
+          <button class="map-nav-btn"
+            onclick="openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">
+            🗺️ 開啟導航
+          </button>
+        </div>` : ''}
+      </div>`;
+    }).join('')}</div>`;
 
   switchTab('intro');
   document.getElementById('overlay-detail').classList.add('open');
@@ -954,10 +971,10 @@ const OFFICE_DB = [
  * 偵測位置後，自動找最近的申請地點並顯示導航按鈕
  * officeKeywords: 此補助項目的辦理地點關鍵字（例如['各區公所社會課','社福諮詢專線']）
  */
-function locateAndNavigate(officeKeywords) {
+function locateAndNavigate(officeKeywords, mapSearchQuery) {
   const btn = document.getElementById('btn-locate');
   if (!navigator.geolocation) {
-    showMapStatus('❌ 您的瀏覽器不支援定位功能，請手動點選下方地點導航');
+    showMapStatus('❌ 無法定位，請直接點「在 Google Maps 搜尋」');
     return;
   }
   btn.disabled = true;
@@ -971,40 +988,45 @@ function locateAndNavigate(officeKeywords) {
       btn.innerHTML = '✅ 已取得位置';
       btn.disabled = false;
       document.getElementById('map-status').style.display = 'none';
-
-      // 根據補助類型過濾資料庫，找最相關又最近的地點
-      showNearestOffices(userLat, userLng, officeKeywords);
+      showNearestOffices(userLat, userLng, officeKeywords, mapSearchQuery);
     },
     err => {
       btn.disabled = false;
       btn.innerHTML = '📍 重試定位';
-      const msgs = {1:'請允許瀏覽器存取位置權限', 2:'無法取得位置，請檢查網路', 3:'定位逾時，請再試一次'};
-      showMapStatus('❌ ' + (msgs[err.code] || '定位失敗') + '<br><small>可手動點選下方地點開啟導航</small>');
+      const msgs = {1:'請允許瀏覽器存取位置', 2:'無法取得位置', 3:'定位逾時'};
+      showMapStatus('❌ ' + (msgs[err.code]||'定位失敗') + ' — 請直接點「在 Google Maps 搜尋」');
     },
     { timeout: 12000, maximumAge: 30000, enableHighAccuracy: false }
   );
 }
 
-function showNearestOffices(lat, lng, keywords) {
-  // 優先篩選與此補助相關的辦理地點類型
+function showNearestOffices(lat, lng, keywords, mapSearchQuery) {
   let pool = OFFICE_DB;
-  const isPublicOffice = keywords.some(k => k.includes('公所') || k.includes('社會'));
-  const isEmployment   = keywords.some(k => k.includes('就業') || k.includes('勞動'));
-  const isFarm         = keywords.some(k => k.includes('農會') || k.includes('農保'));
+  const isEmployment = keywords.some(k => k.includes('就業') || k.includes('勞動'));
+  const isFarm       = keywords.some(k => k.includes('農會') || k.includes('農保'));
 
-  if (isFarm)       pool = OFFICE_DB.filter(o => o.key === '農會' || o.key === '社會局');
+  if (isFarm)            pool = OFFICE_DB.filter(o => o.key === '農會' || o.key === '社會局');
   else if (isEmployment) pool = OFFICE_DB.filter(o => o.key === '就業服務' || o.key === '社會局');
-  else              pool = OFFICE_DB.filter(o => o.key === '社會局');
+  else                   pool = OFFICE_DB.filter(o => o.key === '社會局');
 
   const sorted = pool.map(o => ({
     ...o, dist: Math.round(haversine(lat, lng, o.lat, o.lng) * 10) / 10
   })).sort((a, b) => a.dist - b.dist).slice(0, 3);
 
-  // 自動展示最近那個地點的地圖
-  showOnEmbed(sorted[0].name, sorted[0].lat, sorted[0].lng);
+  const nearest = sorted[0];
+  // 帶座標的 Google Maps 搜尋，結果會以使用者位置為中心排序
+  const gmapsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapSearchQuery)}&near=${lat},${lng}&z=14`;
 
   const el = document.getElementById('map-nearest');
-  el.innerHTML = `<div class="map-nearest-label">📌 距你最近的申辦地點（由近到遠）</div>` +
+  el.innerHTML = `
+    <div class="map-nearest-label">📌 距你最近的申辦地點</div>
+    <a href="${gmapsUrl}" target="_blank" rel="noopener"
+       style="display:flex;align-items:center;justify-content:center;gap:8px;
+              background:var(--yellow);border-radius:12px;padding:14px;
+              font-size:15px;font-weight:700;color:var(--text);
+              text-decoration:none;margin-bottom:12px;-webkit-tap-highlight-color:transparent">
+      🗺️ 在 Google Maps 搜尋「${nearest.name}附近」
+    </a>` +
     sorted.map((o, i) => `
       <div class="map-place-card">
         <div class="mpc-icon">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
@@ -1013,43 +1035,43 @@ function showNearestOffices(lat, lng, keywords) {
           <div class="mpc-addr">${o.addr}</div>
           <span class="mpc-dist">📏 直線距離約 ${o.dist} 公里</span>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-            <button class="map-nav-btn" onclick="openNavigation('${o.name}','${o.addr}')">🗺️ Google 導航前往</button>
-            <button class="map-nav-btn" style="background:var(--yellow-soft)" onclick="showOnEmbed('${o.name}',${o.lat},${o.lng})">📌 地圖預覽</button>
+            <button class="map-nav-btn"
+              onclick="openGoogleMapsSearch('${o.name.replace(/'/g,"\\'")} ${o.addr.replace(/'/g,"\\'")}')">
+              🔍 在地圖搜尋
+            </button>
+            <button class="map-nav-btn"
+              onclick="openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">
+              🗺️ 導航前往
+            </button>
           </div>
         </div>
       </div>`).join('');
   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/** 開啟 Google Maps 導航（iOS Safari 支援） */
-function openNavigation(name, addr) {
-  const dest = encodeURIComponent(name + ' ' + addr);
-  // iOS 優先開 Apple Maps，Android/其他開 Google Maps
+/** 直接在 Google Maps 搜尋關鍵字（最準確，會開啟 Maps App 或網頁版） */
+function openGoogleMapsSearch(query) {
+  const q = encodeURIComponent(query);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   if (isIOS) {
-    // Apple Maps 導航
-    window.open(`maps://?q=${dest}`, '_blank');
-    // 若 1 秒後還在頁面，改開 Google Maps
-    setTimeout(() => {
-      window.open(`https://maps.google.com/maps?daddr=${dest}`, '_blank');
-    }, 1000);
+    // 先嘗試開 Google Maps App，500ms 後 fallback 到網頁版
+    window.location.href = `comgooglemaps://?q=${q}`;
+    setTimeout(() => window.open(`https://maps.google.com/maps?q=${q}`, '_blank'), 500);
   } else {
-    window.open(`https://maps.google.com/maps?daddr=${dest}&travelmode=transit`, '_blank');
+    window.open(`https://maps.google.com/maps?q=${q}`, '_blank');
   }
 }
 
-/** 在 iframe 嵌入地圖預覽 */
-function showOnEmbed(name, lat, lng) {
-  const container = document.getElementById('map-container');
-  const iframe    = document.getElementById('map-iframe');
-  const q = encodeURIComponent(name);
-  if (lat && lng) {
-    iframe.src = `https://maps.google.com/maps?q=${q}&ll=${lat},${lng}&z=16&output=embed&hl=zh-TW`;
+/** 開啟 Google Maps 導航 */
+function openNavigation(name, addr) {
+  const dest = encodeURIComponent(name + ' ' + addr);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    window.location.href = `comgooglemaps://?daddr=${dest}`;
+    setTimeout(() => window.open(`https://maps.google.com/maps?daddr=${dest}`, '_blank'), 500);
   } else {
-    iframe.src = `https://maps.google.com/maps?q=${q}&z=15&output=embed&hl=zh-TW`;
+    window.open(`https://maps.google.com/maps?daddr=${dest}&travelmode=transit`, '_blank');
   }
-  container.style.display = 'block';
-  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function showMapStatus(msg) {
