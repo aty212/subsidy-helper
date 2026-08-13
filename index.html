@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="補助小幫手" />
+  <title>補助小幫手 — 找到適合你的社會補助</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow:      #f5c518;
+      --yellow-soft: #fff8d6;
+      --yellow-mid:  #fde98a;
+      --yellow-dark: #c9960c;
+      --bg:          #fffdf4;
+      --surface:     #ffffff;
+      --surface2:    #fef9e7;
+      --border:      #f0e6b2;
+      --border2:     #e8dda0;
+      --text:        #1a1500;
+      --text2:       #4a3f00;
+      --muted:       #8a7a30;
+      --radius:      18px;
+    }
+
+    body {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+      /* iOS Safari 底部安全區 */
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ══ iOS 底部 Tab Bar ══ */
+    .mobile-tabbar {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: rgba(255,253,244,0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .mobile-tabbar a {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mobile-tabbar a .tb-icon { font-size: 22px; line-height: 1; }
+    .mobile-tabbar a.active { color: var(--yellow-dark); }
+
+    @media (max-width: 540px) {
+      .mobile-tabbar { display: grid; }
+      body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+      nav { padding-top: env(safe-area-inset-top); }
+    }
+
+    /* ══ NAVBAR ══ */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,253,244,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      padding-top: env(safe-area-inset-top);
+      height: calc(60px + env(safe-area-inset-top));
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--yellow);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 8px rgba(245,197,24,0.35);
+    }
+    .nav-logo-text { font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: 0.5px; }
+    .nav-logo-sub  { font-size: 11px; color: var(--muted); }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a {
+      padding: 6px 14px; border-radius: 8px;
+      font-size: 13px; color: var(--text2); text-decoration: none;
+      transition: background 0.15s;
+    }
+    .nav-links a:hover { background: var(--yellow-soft); }
+
+    /* ══ HERO ══ */
+    .hero {
+      max-width: 680px; margin: 0 auto;
+      padding: 52px 24px 36px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--yellow-soft);
+      border: 1px solid var(--border2);
+      border-radius: 99px;
+      padding: 4px 16px;
+      font-size: 12px; font-weight: 700;
+      color: var(--yellow-dark);
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+    .hero h1 {
+      font-size: 34px; font-weight: 900;
+      color: var(--text); line-height: 1.22;
+      margin-bottom: 12px;
+    }
+    .hero h1 em { font-style: normal; color: var(--yellow-dark); }
+    .hero p { font-size: 15px; color: var(--muted); margin-bottom: 28px; }
+
+    /* 搜尋框 */
+    .search-wrap {
+      display: flex; align-items: center;
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: 14px;
+      padding: 10px 16px; gap: 10px;
+      box-shadow: 0 2px 12px rgba(245,197,24,0.12);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-wrap:focus-within {
+      border-color: var(--yellow);
+      box-shadow: 0 2px 16px rgba(245,197,24,0.28);
+    }
+    .search-wrap input {
+      flex: 1; background: none; border: none; outline: none;
+      font-size: 15px; color: var(--text);
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap button {
+      background: var(--yellow); border: none; border-radius: 10px;
+      padding: 8px 20px; font-size: 14px; font-weight: 700;
+      color: var(--text); cursor: pointer;
+      transition: background 0.15s;
+    }
+    .search-wrap button:hover { background: var(--yellow-mid); }
+
+    /* 統計列 */
+    .stats {
+      display: flex; justify-content: center; gap: 32px;
+      margin-top: 28px;
+    }
+    .stat-item { text-align: center; }
+    .stat-item .num { font-size: 24px; font-weight: 900; color: var(--yellow-dark); }
+    .stat-item .label { font-size: 12px; color: var(--muted); }
+
+    /* ══ SECTION ══ */
+    .section { max-width: 680px; margin: 0 auto; padding: 0 24px 44px; }
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* ══ CATEGORY GRID ══ */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .cat-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 14px 16px;
+      cursor: pointer; text-align: center;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    }
+    .cat-card:hover {
+      border-color: var(--yellow);
+      box-shadow: 0 4px 18px rgba(245,197,24,0.22);
+      transform: translateY(-3px);
+    }
+    .cat-card:active { transform: translateY(-1px); }
+    .cat-card .c-icon {
+      font-size: 30px;
+      width: 52px; height: 52px;
+      background: var(--yellow-soft);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 10px;
+    }
+    .cat-card h3 { font-size: 14px; font-weight: 700; color: var(--text); }
+    .cat-card p  { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+    /* ══ FEATURED LIST ══ */
+    .subsidy-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px; margin-bottom: 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .subsidy-row:hover {
+      border-color: var(--yellow);
+      box-shadow: 0 2px 12px rgba(245,197,24,0.18);
+    }
+    .subsidy-row .sr-left { display: flex; align-items: center; gap: 12px; }
+    .subsidy-row .sr-tag {
+      font-size: 11px; font-weight: 700;
+      background: var(--yellow-soft);
+      border: 1px solid var(--border2);
+      border-radius: 6px; padding: 2px 8px;
+      color: var(--yellow-dark); white-space: nowrap;
+    }
+    .subsidy-row .sr-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .subsidy-row .sr-sub  { font-size: 12px; color: var(--muted); }
+    .subsidy-row .sr-arrow { color: var(--yellow-dark); font-size: 20px; flex-shrink: 0; }
+
+    /* ══ MODAL ══ */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,21,0,0.45);
+      z-index: 200; align-items: flex-end; justify-content: center;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 680px;
+      max-height: 92vh; overflow-y: auto;
+      padding-bottom: 36px;
+      animation: slideUp 0.22s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* 拖拉指示條 */
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: var(--border2); border-radius: 99px;
+      margin: 12px auto 0;
+    }
+
+    .modal-header {
+      position: sticky; top: 0;
+      background: var(--surface);
+      padding: 14px 20px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 17px; font-weight: 800; color: var(--text); }
+    .modal-close {
+      width: 30px; height: 30px;
+      background: var(--yellow-soft); border: none; border-radius: 50%;
+      color: var(--text2); font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: var(--yellow-mid); }
+
+    /* 列表 modal */
+    .modal-list-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .modal-list-item:last-child { border-bottom: none; }
+    .modal-list-item:hover { background: var(--yellow-soft); }
+    .modal-list-item .ml-left h3 { font-size: 15px; font-weight: 600; color: var(--text); }
+    .modal-list-item .ml-left p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .modal-list-item .ml-arrow   { color: var(--yellow-dark); font-size: 18px; }
+
+    /* 詳情 modal header */
+    .detail-hero {
+      background: linear-gradient(135deg, var(--yellow) 0%, var(--yellow-mid) 100%);
+      padding: 20px 22px 18px;
+    }
+    .detail-hero .dh-tag {
+      font-size: 11px; font-weight: 700;
+      background: rgba(255,255,255,0.5);
+      border-radius: 6px; padding: 2px 9px;
+      color: var(--text2); display: inline-block; margin-bottom: 8px;
+    }
+    .detail-hero h2 { font-size: 21px; font-weight: 900; color: var(--text); }
+    .detail-hero p  { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .tab-btn {
+      flex: 1; padding: 12px 4px;
+      background: none; border: none;
+      color: var(--muted); font-size: 13px; font-weight: 600;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn.active { color: var(--yellow-dark); border-bottom-color: var(--yellow); }
+    .tab-content { display: none; padding: 18px 20px; }
+    .tab-content.active { display: block; }
+
+    /* 詳情內容 */
+    .info-block { margin-bottom: 18px; }
+    .info-block h3 {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+    .info-block ul { list-style: none; }
+    .info-block ul li {
+      font-size: 14px; color: var(--text);
+      padding: 7px 0; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+    }
+    .info-block ul li:last-child { border-bottom: none; }
+    .info-block ul li::before { content: "▸"; color: var(--yellow-dark); flex-shrink: 0; margin-top: 2px; }
+
+    .step-list { list-style: none; counter-reset: steps; }
+    .step-list li {
+      counter-increment: steps;
+      font-size: 14px; color: var(--text);
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 12px; line-height: 1.5;
+    }
+    .step-list li:last-child { border-bottom: none; }
+    .step-list li::before {
+      content: counter(steps);
+      background: var(--yellow); color: var(--text);
+      font-weight: 800; font-size: 12px;
+      min-width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    .doc-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--yellow-soft);
+      border: 1px solid var(--border2);
+      border-radius: 8px; padding: 6px 12px;
+      font-size: 13px; color: var(--text2);
+      margin: 0 6px 8px 0;
+    }
+    .doc-chip::before { content: "📄"; font-size: 12px; }
+
+    .office-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .office-card strong { color: var(--yellow-dark); display: block; margin-bottom: 3px; font-size: 14px; }
+    .office-card span   { font-size: 13px; color: var(--muted); }
+
+    /* ══ LANG ══ */
+    .lang-btn {
+      background: none; border: 1.5px solid var(--border2);
+      border-radius: 8px; padding: 5px 10px;
+      font-size: 13px; font-weight: 600; color: var(--text2);
+      cursor: pointer; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .lang-btn:hover, .lang-btn.active { background: var(--yellow-soft); border-color: var(--yellow); }
+    .lang-picker {
+      display: none; position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--surface); border: 1.5px solid var(--border2);
+      border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 300; min-width: 160px; overflow: hidden;
+      animation: fadeIn 0.15s ease;
+    }
+    .lang-picker.open { display: block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .lang-picker button {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 11px 16px;
+      border: none; background: none;
+      font-size: 14px; color: var(--text); cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lang-picker button:last-child { border-bottom: none; }
+    .lang-picker button:hover { background: var(--yellow-soft); }
+    .lang-picker button.cur { font-weight: 700; color: var(--yellow-dark); }
+    .lang-wrap { position: relative; }
+
+    /* ══ FOOTER ══ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      text-align: center;
+      font-size: 12px; color: var(--muted);
+    }
+    footer a { color: var(--yellow-dark); text-decoration: none; }
+
+    /* ══ MAP ══ */
+    #map-container {
+      width: 100%; height: 280px;
+      border-radius: 14px; overflow: hidden;
+      border: 1.5px solid var(--border2);
+      margin-bottom: 12px;
+      background: var(--yellow-soft);
+    }
+    .map-locate-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 13px 0;
+      background: var(--yellow);
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; color: var(--text);
+      cursor: pointer; margin-bottom: 14px;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+    .map-locate-btn:active { background: var(--yellow-mid); }
+    .map-locate-btn:disabled { opacity: 0.6; }
+    .map-nearest-label {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .map-place-card {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--surface2); border: 1.5px solid var(--border2);
+      border-radius: 14px; padding: 14px; margin-bottom: 10px;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s;
+    }
+    .map-place-card:active { border-color: var(--yellow); background: #fff8d6; }
+    .map-place-card .mpc-icon {
+      font-size: 20px; width: 40px; height: 40px;
+      background: var(--yellow-soft); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .map-place-card .mpc-name  { font-size: 14px; font-weight: 700; color: var(--text); }
+    .map-place-card .mpc-addr  { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+    .map-place-card .mpc-dist  {
+      font-size: 11px; font-weight: 700; color: var(--yellow-dark);
+      background: var(--yellow-soft); border-radius: 6px;
+      padding: 2px 8px; margin-top: 5px; display: inline-block;
+    }
+    .map-nav-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--yellow); border: none; border-radius: 8px;
+      padding: 5px 12px; font-size: 12px; font-weight: 700;
+      color: var(--text); cursor: pointer; margin-top: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .map-status {
+      font-size: 13px; color: var(--muted);
+      text-align: center; padding: 12px 0;
+    }
+    .map-info-banner {
+      background: var(--yellow-soft); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 10px 14px;
+      font-size: 13px; color: var(--text2); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ══ RWD ══ */
+    @media (max-width: 540px) {
+      .hero h1 { font-size: 26px; }
+      .cat-grid { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+      .stats { gap: 20px; }
+      .modal { border-radius: 20px 20px 0 0; }
+      .tab-btn { font-size: 12px; padding: 11px 2px; }
+      /* 增加觸控目標大小 */
+      .cat-card { padding: 20px 12px 18px; min-height: 90px; }
+      .subsidy-row { padding: 16px 16px; }
+      .modal-list-item { padding: 16px 20px; }
+    }
+  </style>
+  <!-- Google Maps API（使用免費 iframe Embed，不需 API Key） -->
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">🌟</div>
+    <div>
+      <div class="nav-logo-text">補助小幫手</div>
+      <div class="nav-logo-sub">社會補助查詢平台</div>
+    </div>
+  </a>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="nav-links">
+      <a href="#categories" data-i18n="nav_cat">補助類別</a>
+      <a href="#featured"   data-i18n="nav_feat">精選補助</a>
+      <a href="#hotline"    data-i18n="nav_hot">諮詢專線</a>
+    </div>
+    <!-- 語言切換 -->
+    <div class="lang-wrap" id="lang-wrap">
+      <button class="lang-btn" id="lang-btn" onclick="toggleLangPicker(event)">🌐 繁中</button>
+      <div class="lang-picker" id="lang-picker">
+        <button onclick="setLang('zh')">🇹🇼 繁體中文</button>
+        <button onclick="setLang('en')">🇺🇸 English</button>
+        <button onclick="setLang('vi')">🇻🇳 Tiếng Việt</button>
+        <button onclick="setLang('id')">🇮🇩 Bahasa Indonesia</button>
+        <button onclick="setLang('th')">🇹🇭 ภาษาไทย</button>
+        <button onclick="setLang('ja')">🇯🇵 日本語</button>
+        <button onclick="setLang('ko')">🇰🇷 한국어</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- iOS 底部 Tab Bar（手機用） -->
+<div class="mobile-tabbar" id="mobile-tabbar">
+  <a href="#categories" onclick="setTabActive(this)">
+    <span class="tb-icon">🏷️</span>類別
+  </a>
+  <a href="#featured" onclick="setTabActive(this)">
+    <span class="tb-icon">⭐</span>精選
+  </a>
+  <a href="#hotline" onclick="setTabActive(this)">
+    <span class="tb-icon">📞</span>專線
+  </a>
+  <a href="#" onclick="openSearchMobile(event)">
+    <span class="tb-icon">🔍</span>搜尋
+  </a>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge" data-i18n="hero_badge">✦ 全台社會福利補助整合平台</div>
+  <h1 data-i18n="hero_h1">找到<em>最適合你</em>的<br>社會補助資源</h1>
+  <p data-i18n="hero_p">整合政府各類社會福利補助，快速查詢申請方式、必備文件與洽辦地點</p>
+  <div class="search-wrap">
+    <span style="color:var(--muted);font-size:16px;">🔍</span>
+    <input type="text" id="search-input"
+           data-i18n-placeholder="search_ph"
+           placeholder="搜尋補助名稱，例如：老農津貼、育兒補助、低收入…"
+           oninput="liveSearch(this.value)" onkeydown="if(event.key==='Enter')doSearch()" />
+    <button onclick="doSearch()" data-i18n="search_btn">搜尋</button>
+  </div>
+  <div id="search-results" style="text-align:left;margin-top:10px;"></div>
+  <div class="stats">
+    <div class="stat-item"><div class="num">8</div><div class="label">補助類別</div></div>
+    <div class="stat-item"><div class="num">20+</div><div class="label">補助項目</div></div>
+    <div class="stat-item"><div class="num">即時</div><div class="label">資料更新</div></div>
+  </div>
+</div>
+
+<!-- Categories -->
+<div class="section" id="categories">
+  <div class="section-header">
+    <div class="section-title" data-i18n="sec_cat">補助類別</div>
+    <div class="section-line"></div>
+  </div>
+  <div class="cat-grid" id="cat-grid"></div>
+</div>
+
+<!-- Featured -->
+<div class="section" id="featured">
+  <div class="section-header">
+    <div class="section-title">精選補助項目</div>
+    <div class="section-line"></div>
+  </div>
+  <div id="featured-list"></div>
+</div>
+
+<!-- Hotline -->
+<div class="section" id="hotline">
+  <div class="section-header">
+    <div class="section-title">重要諮詢專線</div>
+    <div class="section-line"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+    <div class="office-card"><strong>社福諮詢專線</strong><span>☎ 1957（全年 24 小時）</span></div>
+    <div class="office-card"><strong>長照服務專線</strong><span>☎ 1966</span></div>
+    <div class="office-card"><strong>家暴性侵專線</strong><span>☎ 113</span></div>
+    <div class="office-card"><strong>移民署服務站</strong><span>☎ 0800-024-111</span></div>
+    <div class="office-card"><strong>原民會服務專線</strong><span>☎ 0800-068-752</span></div>
+    <div class="office-card"><strong>勞工局諮詢專線</strong><span>☎ 1955</span></div>
+  </div>
+</div>
+
+<footer>
+  補助小幫手 · 資料來源：衛生福利部、各地方政府社會局<br>
+  如有疑問請洽各地公所社會課或撥打 <a href="tel:1957">1957 社福諮詢專線</a>
+</footer>
+
+<!-- Modal：類別列表 -->
+<div class="overlay" id="overlay-list" onclick="closeIfBg(event,'overlay-list')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2 id="modal-list-title"></h2>
+      <button class="modal-close" onclick="closeModal('overlay-list')">✕</button>
+    </div>
+    <div id="modal-list-body"></div>
+  </div>
+</div>
+
+<!-- Modal：補助詳情 -->
+<div class="overlay" id="overlay-detail" onclick="closeIfBg(event,'overlay-detail')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="detail-hero">
+      <div class="dh-tag" id="detail-cat-tag"></div>
+      <h2 id="detail-name"></h2>
+      <p id="detail-sub"></p>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('intro')">簡介</button>
+      <button class="tab-btn" onclick="switchTab('process')">流程</button>
+      <button class="tab-btn" onclick="switchTab('docs')">必備文件</button>
+      <button class="tab-btn" onclick="switchTab('map')">洽辦地點</button>
+    </div>
+    <div id="tab-intro"   class="tab-content active"></div>
+    <div id="tab-process" class="tab-content"></div>
+    <div id="tab-docs"    class="tab-content"></div>
+    <div id="tab-map"     class="tab-content"></div>
+  </div>
+</div>
+
+<!-- 搜尋 overlay（手機用） -->
+<div class="overlay" id="overlay-search" onclick="closeIfBg(event,'overlay-search')" style="align-items:flex-start;padding-top:60px">
+  <div class="modal" style="border-radius:20px;max-height:80vh;padding:20px">
+    <div style="font-size:16px;font-weight:800;margin-bottom:12px;">🔍 搜尋補助</div>
+    <div class="search-wrap" style="margin-bottom:12px;">
+      <span style="color:var(--muted);">🔍</span>
+      <input id="mobile-search-input" type="text" placeholder="輸入補助名稱或類別…"
+        oninput="liveSearchMobile(this.value)" style="font-size:16px;" />
+    </div>
+    <div id="mobile-search-results"></div>
+  </div>
+</div>
+
+<script>
+// ══════════ 資料庫 ══════════
+const DATA = {
+  elder: {
+    title: "長者", icon: "👴", desc: "老農津貼、長照、敬老補助",
+    items: [
+      { name: "老農津貼", sub: "每月 7,550～8,550 元",
+        intro: ["每月發放 7,550 元（一般）或 8,550 元（加強版）","年滿 65 歲之農保被保險人","未領取其他政府月退休金","須加入農保滿六個月"],
+        process: ["備妥相關文件","至戶籍所在地公所社會課申請","公所審核資格","通過後次月起發放"],
+        docs: ["身分證正本及影本","農保加保資料","存款帳戶封面影本","印章"],
+        offices: [{name:"各地區公所社會課",addr:"請依戶籍地查詢"},{name:"農委會農業保險基金",addr:"☎ 0800-089-995"}] },
+      { name: "中低收入老人生活津貼", sub: "每月 3,000～7,759 元",
+        intro: ["年滿 65 歲、具中低收入資格","一般中低：每月 3,000 元；較低者：每月 7,759 元","不得同時領取低收入老人生活補助"],
+        process: ["向戶籍地公所提出申請","公所調查家庭經濟狀況","縣市政府審核核定","核准後次月起發放"],
+        docs: ["申請書","身分證及戶口名簿影本","財稅資料同意書","存款帳戶影本"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"}] },
+      { name: "長照居家服務", sub: "每月補助 10,020～36,180 元",
+        intro: ["依失能等級補助每月 10,020～36,180 元","可用於居家服務、日照、交通接送","政府補助 70～90%，個人自付 10～30%"],
+        process: ["撥打 1966 長照專線申請","照管專員入戶評估失能等級","擬定照顧計畫","媒合服務提供單位","開始使用服務"],
+        docs: ["身分證","病歷或醫師診斷書（視情況）","戶口名簿"],
+        offices: [{name:"長照服務專線",addr:"☎ 撥打 1966"}] },
+      { name: "敬老福利生活津貼", sub: "年滿 65 歲每月補助（各縣市不同）",
+        intro: ["各縣市額度不同，約每月 1,000～5,000 元","年滿 65 歲本國籍市民","未領取其他月退金者優先","部分縣市為重陽禮金（一次性）"],
+        process: ["攜帶文件至戶籍地區公所申請","審核通過後核撥"],
+        docs: ["身分證","戶口名簿","存款帳戶影本"],
+        offices: [{name:"各縣市區公所社會課",addr:"請依戶籍地查詢"}] }
+    ]
+  },
+  lowincome: {
+    title: "中低收入", icon: "🏠", desc: "生活補助、急難救助、就學",
+    items: [
+      { name: "低收入戶生活補助", sub: "補足至每人每月最低生活費",
+        intro: ["依家庭人口數計算，補足至最低生活費（約 14,230 元/人）","全家人口均計入資產及所得審查","每年重新審核資格"],
+        process: ["向戶籍地公所提出申請","公所家庭訪視及調查","縣市政府審核","通過後按月發放"],
+        docs: ["申請書","全戶戶口名簿","所有成員財稅及財產資料","租賃契約（如有）","存款帳戶影本"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"}] },
+      { name: "急難救助金", sub: "一次性最高 3 萬元",
+        intro: ["遭遇緊急變故（失業、疾病、天災等）","一次性補助，最高約 3 萬元","無需具低收入戶資格即可申請"],
+        process: ["向戶籍地公所或社會局申請","說明緊急狀況並備齊文件","社工訪視評估","通過後撥款（最快 1 週）"],
+        docs: ["申請書","身分證","戶口名簿","緊急事由相關佐證（醫療收據、失業證明等）"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"},{name:"社福諮詢專線",addr:"☎ 1957"}] },
+      { name: "中低收入戶子女就學補助", sub: "高中至大學每學期最高 25,800 元",
+        intro: ["國小至大學各階段均有補助","高中職每學期最高 10,800 元","大專院校每學期最高 25,800 元","每學年申請一次"],
+        process: ["開學後向學校提出申請","學校彙整資料送縣市政府","審核通過後撥款"],
+        docs: ["申請書","中低收入戶證明","在學證明","學費收據","存款帳戶影本"],
+        offices: [{name:"就讀學校教務處或學務處",addr:"請洽就讀學校"}] }
+    ]
+  },
+  disability: {
+    title: "身心障礙", icon: "♿", desc: "生活補助、輔具、托育",
+    items: [
+      { name: "身心障礙生活補助", sub: "每月 3,500～7,500 元",
+        intro: ["依障礙等級及家庭收入核定","輕度：每月 3,500～4,700 元","中重度：每月 5,500～7,500 元","須符合低收入或中低收入資格"],
+        process: ["備妥文件向戶籍地公所申請","公所審核障礙等級及經濟狀況","審核通過後次月起發放"],
+        docs: ["申請書","身心障礙手冊或證明","身分證及戶口名簿","財稅資料同意書","存款帳戶影本"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"}] },
+      { name: "輔具費用補助", sub: "每項補助 2,000～100,000 元",
+        intro: ["輪椅、助聽器、視障輔具等均可申請","依項目補助 2,000～100,000 元不等","每項每隔一定年限可再申請","須先取得評估報告再購買"],
+        process: ["向公所或醫院申請評估","取得評估報告後購買輔具","檢附發票向公所申請補助","審核通過後撥款"],
+        docs: ["申請書","身心障礙手冊或證明","醫師或治療師評估報告","輔具購買發票正本","存款帳戶影本"],
+        offices: [{name:"各縣市輔具中心",addr:"請洽各縣市社會局"},{name:"衛福部輔具中心",addr:"☎ 02-2597-3511"}] },
+      { name: "身心障礙者托育養護補助", sub: "每月最高 11,000 元",
+        intro: ["送住機構照顧之身心障礙者","依入住類型及收入核定補助","低收入戶優先，最高每月 11,000 元"],
+        process: ["確認機構具合法立案","向公所申請補助資格","審核通過後按月補助"],
+        docs: ["申請書","身心障礙手冊","入住契約書","存款帳戶影本"],
+        offices: [{name:"各縣市社會局身心障礙科",addr:"請依戶籍地查詢"}] }
+    ]
+  },
+  children: {
+    title: "兒童及育兒", icon: "👶", desc: "育兒津貼、托育補助、生育獎勵",
+    items: [
+      { name: "育兒津貼（0～2 歲）", sub: "每月 2,500～5,000 元",
+        intro: ["0～2 歲未入公共托育之兒童","一般家庭：每月 2,500 元","中低收入：每月 4,000 元","低收入：每月 5,000 元"],
+        process: ["於出生 6 個月內向戶籍地公所申請","備齊出生證明及相關文件","審核通過後按月發放至滿 2 歲"],
+        docs: ["申請書","出生證明或戶口名簿","育兒主要照顧者身分證","存款帳戶影本"],
+        offices: [{name:"各區公所戶政或社會課",addr:"請依戶籍地查詢"}] },
+      { name: "公共托育補助", sub: "每月補助最高 3,000 元",
+        intro: ["入公共（社區）托育中心之 0～2 歲兒童","一般家庭補助費用差額約 3,000 元/月","中低/低收入戶補助比例更高"],
+        process: ["至鄰近公共托育中心登記候補","抽籤或依順位錄取","入托後由中心協助申請補助"],
+        docs: ["出生證明","托育契約書","存款帳戶影本"],
+        offices: [{name:"各縣市公共托育中心",addr:"請洽縣市社會局查詢"}] },
+      { name: "生育獎勵金", sub: "各縣市不同，最高 6 萬元以上",
+        intro: ["各縣市額度差異大，部分縣市每胎最高 6 萬元","部分加碼：第三胎以上額外獎勵","戶籍須設於該縣市","出生後一定期限內申請"],
+        process: ["於出生後 6 個月內向戶籍地公所申請","核實戶籍及出生資料","撥款至指定帳戶"],
+        docs: ["申請書","出生證明","戶口名簿","存款帳戶影本"],
+        offices: [{name:"各縣市區公所戶政科",addr:"請依戶籍地查詢"}] }
+    ]
+  },
+  indigenous: {
+    title: "原住民及新住民", icon: "🌿", desc: "生活輔助、文化傳承、適應補助",
+    items: [
+      { name: "原住民族生活輔助", sub: "醫療、教育、急難救助多項補助",
+        intro: ["具原住民族籍者可申請","包含醫療、教育、急難救助等","部分補助依低收入資格核定"],
+        process: ["備妥族籍及相關文件","向戶籍地公所或原民會申請","審核通過後核發補助"],
+        docs: ["原住民族籍身分證明","戶口名簿","視補助項目備齊相關文件"],
+        offices: [{name:"原住民族委員會",addr:"☎ 0800-068-752"}] },
+      { name: "新住民生活適應補助", sub: "急難救助最高 3 萬元",
+        intro: ["提供生活適應課程及翻譯服務","急難救助金最高 3 萬元","子女就學補助及托育補助"],
+        process: ["向戶籍地移民署服務站諮詢","確認符合資格後提出申請","審核通過核發補助"],
+        docs: ["外僑居留證或定居證","戶口名簿","結婚證明","視補助項目備齊文件"],
+        offices: [{name:"內政部移民署各服務站",addr:"☎ 0800-024-111"}] }
+    ]
+  },
+  singleparent: {
+    title: "單親家庭", icon: "👩‍👦", desc: "特殊境遇、子女津貼、法律協助",
+    items: [
+      { name: "特殊境遇家庭扶助", sub: "每月最高 4,955 元，最長 6 個月",
+        intro: ["緊急生活扶助：每人每月 4,955 元（最長 6 個月）","子女生活津貼：每名子女每月 3,228 元","兒童托育津貼：每名子女每月最高 5,000 元","需符合特殊境遇條件（離婚、喪偶、受暴等）"],
+        process: ["向戶籍地公所社會課提出申請","備齊文件及說明特殊境遇","社工家訪及審核","通過後核發補助"],
+        docs: ["申請書","身分證及戶口名簿","離婚判決書/死亡證明/保護令","子女出生證明","存款帳戶影本"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"},{name:"家暴性侵防治專線",addr:"☎ 113"}] },
+      { name: "未成年子女生活津貼", sub: "每名子女每月 3,228 元",
+        intro: ["每名子女每月 3,228 元","子女須未滿 18 歲（就學可延至 25 歲）","申請人須為單親且符合低中低收入資格"],
+        process: ["向公所提出申請","審核收入及單親資格","通過後按月發放至子女成年"],
+        docs: ["申請書","戶口名簿","離婚或喪偶證明","子女在學證明","存款帳戶影本"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"}] }
+    ]
+  },
+  employment: {
+    title: "就業與職訓", icon: "💼", desc: "失業給付、職訓補助、創業貸款",
+    items: [
+      { name: "失業給付", sub: "最長 6 個月，每月最高 60% 投保薪資",
+        intro: ["非自願離職且積極求職者","每月領取最後投保薪資之 60%","最長 6 個月（55 歲以上可延至 9 個月）","需於離職後 2 年內申請"],
+        process: ["至公立就業服務站辦理求職登記","提出失業認定申請","備妥文件審核","通過後按月發放"],
+        docs: ["身分證","離職證明書","最近 6 個月薪資單","存款帳戶影本"],
+        offices: [{name:"台灣就業通（公立就業服務站）",addr:"☎ 0800-777-888"}] },
+      { name: "職業訓練補助", sub: "最高補助 100% 訓練費用",
+        intro: ["在職或失業勞工均可申請","補助比例依身份別：失業者最高 100%","課程涵蓋資訊、語言、技術等類別","部分課程提供生活津貼"],
+        process: ["至勞動部訓練入口網選課","提出申請並備齊文件","完成訓練後核發補助"],
+        docs: ["身分證","勞保或就保加保資料","報名費收據"],
+        offices: [{name:"勞動力發展署",addr:"☎ 0800-777-888"},{name:"訓練入口網",addr:"https://train.wda.gov.tw"}] },
+      { name: "微型創業鳳凰貸款", sub: "最高 200 萬元，利率優惠",
+        intro: ["年滿 20～65 歲欲創業之女性及弱勢族群","貸款最高 200 萬元，政府補貼利息","提供免費創業輔導及諮詢"],
+        process: ["參加創業研習課程","撰寫創業計畫書","向合作金融機構提出貸款申請","審核通過後撥款"],
+        docs: ["身分證","創業計畫書","研習課程結業證明","相關資格證明"],
+        offices: [{name:"勞動部婦女創業諮詢",addr:"☎ 0800-777-888"}] }
+    ]
+  },
+  housing: {
+    title: "住宅補助", icon: "🏡", desc: "租屋補貼、社會住宅、修繕補助",
+    items: [
+      { name: "租屋補貼", sub: "每月最高 5,000 元",
+        intro: ["年滿 20 歲租屋自住者","依縣市及家庭收入核定，每月 2,500～5,000 元","不得同時申請社會住宅","須為無自有住宅者"],
+        process: ["準備租約及相關文件","向戶籍地縣市政府住宅處申請","審核通過後按月撥款至房東帳戶"],
+        docs: ["申請書","租賃契約書（須公證或簽約滿 1 個月）","身分證及戶口名簿","財稅資料","存款帳戶影本"],
+        offices: [{name:"各縣市政府住宅處",addr:"請依戶籍地查詢"},{name:"內政部不動產資訊平台",addr:"☎ 1299"}] },
+      { name: "老舊房屋修繕補助", sub: "最高補助 12 萬元",
+        intro: ["屋齡 20 年以上且有修繕需求","低收入或中低收入戶優先","最高補助 12 萬元","修繕項目包含屋頂、水電、結構等"],
+        process: ["向戶籍地公所社會課提出申請","公所勘查屋況","審核通過後發包施工","驗收後核撥補助款"],
+        docs: ["申請書","房屋所有權狀或使用同意書","屋況照片","估價單"],
+        offices: [{name:"各區公所社會課",addr:"請依戶籍地查詢"}] }
+    ]
+  }
+};
+
+// ══ 渲染類別卡片 ══
+(function renderCats() {
+  const grid = document.getElementById('cat-grid');
+  Object.entries(DATA).forEach(([key, cat]) => {
+    const div = document.createElement('div');
+    div.className = 'cat-card';
+    div.innerHTML = `<div class="c-icon">${cat.icon}</div><h3>${cat.title}</h3><p>${cat.desc}</p>`;
+    div.onclick = () => openListModal(key);
+    grid.appendChild(div);
+  });
+})();
+
+// ══ 精選補助 ══
+const FEATURED = [
+  {cat:'elder',idx:0},{cat:'lowincome',idx:1},{cat:'children',idx:0},
+  {cat:'disability',idx:1},{cat:'singleparent',idx:0},{cat:'employment',idx:0},
+];
+(function renderFeatured() {
+  const el = document.getElementById('featured-list');
+  FEATURED.forEach(({cat,idx}) => {
+    const catData = DATA[cat], item = catData.items[idx];
+    const div = document.createElement('div');
+    div.className = 'subsidy-row';
+    div.innerHTML = `
+      <div class="sr-left">
+        <span class="sr-tag">${catData.icon} ${catData.title}</span>
+        <div><div class="sr-name">${item.name}</div><div class="sr-sub">${item.sub}</div></div>
+      </div>
+      <span class="sr-arrow">›</span>`;
+    div.onclick = () => { currentCat = cat; openDetailModal(idx); };
+    el.appendChild(div);
+  });
+})();
+
+// ══ 搜尋 ══
+let currentCat = null;
+
+function liveSearch(val) {
+  val = val.trim().toLowerCase();
+  const box = document.getElementById('search-results');
+  if (!val || val.length < 2) { box.innerHTML = ''; return; }
+  const hits = [];
+  Object.entries(DATA).forEach(([cat, catData]) => {
+    catData.items.forEach((item, idx) => {
+      if (item.name.toLowerCase().includes(val) || item.sub.toLowerCase().includes(val) || catData.title.toLowerCase().includes(val))
+        hits.push({ cat, idx, item, catData });
+    });
+  });
+  if (!hits.length) { box.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 4px;">找不到相符的補助項目</div>'; return; }
+  box.innerHTML = hits.map(({cat,idx,item,catData}) =>
+    `<div class="subsidy-row" style="margin-bottom:8px" onclick="currentCat='${cat}';openDetailModal(${idx})">
+      <div class="sr-left">
+        <span class="sr-tag">${catData.icon} ${catData.title}</span>
+        <div><div class="sr-name">${item.name}</div><div class="sr-sub">${item.sub}</div></div>
+      </div><span class="sr-arrow">›</span></div>`
+  ).join('');
+}
+
+function doSearch() {
+  liveSearch(document.getElementById('search-input').value);
+}
+
+// ══ Modal 控制 ══
+function openListModal(cat) {
+  currentCat = cat;
+  const catData = DATA[cat];
+  document.getElementById('modal-list-title').textContent = `${catData.icon} ${catData.title}`;
+  const body = document.getElementById('modal-list-body');
+  body.innerHTML = '';
+  catData.items.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'modal-list-item';
+    div.innerHTML = `
+      <div class="ml-left"><h3>${item.name}</h3><p>${item.sub}</p></div>
+      <span class="ml-arrow">›</span>`;
+    div.onclick = () => { closeModal('overlay-list'); openDetailModal(idx); };
+    body.appendChild(div);
+  });
+  document.getElementById('overlay-list').classList.add('open');
+}
+
+function openDetailModal(idx) {
+  const catData = DATA[currentCat], item = catData.items[idx];
+  document.getElementById('detail-cat-tag').textContent = `${catData.icon} ${catData.title}`;
+  document.getElementById('detail-name').textContent = item.name;
+  document.getElementById('detail-sub').textContent  = item.sub;
+
+  document.getElementById('tab-intro').innerHTML = `
+    <div class="info-block"><h3>補助說明</h3>
+    <ul>${item.intro.map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+
+  document.getElementById('tab-process').innerHTML = `
+    <div class="info-block"><h3>申請步驟</h3>
+    <ol class="step-list">${item.process.map(t=>`<li>${t}</li>`).join('')}</ol></div>`;
+
+  document.getElementById('tab-docs').innerHTML = `
+    <div class="info-block"><h3>需備文件</h3>
+    <div style="margin-top:6px">${item.docs.map(t=>`<span class="doc-chip">${t}</span>`).join('')}</div></div>`;
+
+  // 地圖 tab：動態組建（帶入申請地點關鍵字）
+  const officeKeywords = item.offices.map(o => o.name).filter(n => !n.startsWith('☎') && !n.startsWith('https'));
+  document.getElementById('tab-map').innerHTML = `
+    <div class="map-info-banner">
+      💡 偵測你的位置後，會自動找到距離最近的<strong>申請辦理地點</strong>並提供導航
+    </div>
+    <button class="map-locate-btn" id="btn-locate" onclick="locateAndNavigate(${JSON.stringify(officeKeywords)})">
+      📍 偵測位置，找最近辦理地點
+    </button>
+    <div id="map-status" class="map-status" style="display:none"></div>
+    <div id="map-nearest"></div>
+    <div id="map-container" style="display:none">
+      <iframe id="map-iframe" width="100%" height="280" style="border:0;display:block"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src=""></iframe>
+    </div>
+    <div class="info-block" style="margin-top:12px"><h3>洽辦地點一覽</h3>
+    ${item.offices.map(o=>`
+      <div class="office-card" style="cursor:pointer" onclick="openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">
+        <strong>${o.name}</strong><span>${o.addr}</span>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="map-nav-btn" onclick="event.stopPropagation();openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">🗺️ 開啟導航</button>
+          <button class="map-nav-btn" style="background:var(--yellow-soft)" onclick="event.stopPropagation();showOnEmbed('${o.name.replace(/'/g,"\\'")}')">📌 在地圖預覽</button>
+        </div>
+      </div>`).join('')}</div>`;
+
+  switchTab('intro');
+  document.getElementById('overlay-detail').classList.add('open');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeIfBg(e,id){ if(e.target.id===id) closeModal(id); }
+
+// ══ 地圖功能（重構版）══
+let userLat = null, userLng = null;
+
+// 全台主要社會局/公所座標資料庫
+const OFFICE_DB = [
+  { name: '台北市社會局',     addr: '台北市中正區北平東路 30-1 號', lat: 25.0456, lng: 121.5203, key: '社會局' },
+  { name: '新北市社會局',     addr: '新北市板橋區中山路一段 161 號', lat: 25.0116, lng: 121.4639, key: '社會局' },
+  { name: '桃園市社會局',     addr: '桃園市桃園區縣府路 1 號',      lat: 24.9936, lng: 121.3009, key: '社會局' },
+  { name: '台中市社會局',     addr: '台中市西屯區臺灣大道三段 99 號', lat: 24.1633, lng: 120.6478, key: '社會局' },
+  { name: '台南市社會局',     addr: '台南市安平區永華路二段 6 號',   lat: 22.9897, lng: 120.1952, key: '社會局' },
+  { name: '高雄市社會局',     addr: '高雄市苓雅區四維三路 2 號',     lat: 22.6273, lng: 120.3014, key: '社會局' },
+  { name: '新竹市社會處',     addr: '新竹市中正路 120 號',           lat: 24.8036, lng: 120.9717, key: '社會局' },
+  { name: '基隆市社會處',     addr: '基隆市義一路 1 號',             lat: 25.1285, lng: 121.7419, key: '社會局' },
+  { name: '嘉義市社會處',     addr: '嘉義市東區中山路 199 號',       lat: 23.4801, lng: 120.4491, key: '社會局' },
+  { name: '宜蘭縣社會處',     addr: '宜蘭縣宜蘭市縣政北路 1 號',    lat: 24.7513, lng: 121.7560, key: '社會局' },
+  { name: '花蓮縣社會處',     addr: '花蓮縣花蓮市府前路 17 號',     lat: 23.9914, lng: 121.6012, key: '社會局' },
+  { name: '台東縣社會處',     addr: '台東縣台東市博愛路 336 號',     lat: 22.7555, lng: 121.1441, key: '社會局' },
+  { name: '澎湖縣社會處',     addr: '澎湖縣馬公市治平路 32 號',      lat: 23.5674, lng: 119.5722, key: '社會局' },
+  // 農會（老農津貼）
+  { name: '台北市農會',       addr: '台北市大安區信義路三段 150 號', lat: 25.0338, lng: 121.5437, key: '農會' },
+  { name: '台中市農會',       addr: '台中市南區建國路一段 299 號',   lat: 24.1299, lng: 120.6708, key: '農會' },
+  { name: '高雄市農會',       addr: '高雄市三民區九如一路 390 號',   lat: 22.6511, lng: 120.3003, key: '農會' },
+  // 就業服務站（失業給付）
+  { name: '台北就業服務中心', addr: '台北市中正區中華路一段 39 號',  lat: 25.0437, lng: 121.5079, key: '就業服務' },
+  { name: '高雄就業服務中心', addr: '高雄市苓雅區和平一路 62 號',    lat: 22.6241, lng: 120.3067, key: '就業服務' },
+  { name: '台中就業服務中心', addr: '台中市西區民權路 105 號',       lat: 24.1477, lng: 120.6656, key: '就業服務' },
+];
+
+/**
+ * 偵測位置後，自動找最近的申請地點並顯示導航按鈕
+ * officeKeywords: 此補助項目的辦理地點關鍵字（例如['各區公所社會課','社福諮詢專線']）
+ */
+function locateAndNavigate(officeKeywords) {
+  const btn = document.getElementById('btn-locate');
+  if (!navigator.geolocation) {
+    showMapStatus('❌ 您的瀏覽器不支援定位功能，請手動點選下方地點導航');
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '⏳ 定位中…';
+  showMapStatus('📡 正在取得您的位置，請稍候…');
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      btn.innerHTML = '✅ 已取得位置';
+      btn.disabled = false;
+      document.getElementById('map-status').style.display = 'none';
+
+      // 根據補助類型過濾資料庫，找最相關又最近的地點
+      showNearestOffices(userLat, userLng, officeKeywords);
+    },
+    err => {
+      btn.disabled = false;
+      btn.innerHTML = '📍 重試定位';
+      const msgs = {1:'請允許瀏覽器存取位置權限', 2:'無法取得位置，請檢查網路', 3:'定位逾時，請再試一次'};
+      showMapStatus('❌ ' + (msgs[err.code] || '定位失敗') + '<br><small>可手動點選下方地點開啟導航</small>');
+    },
+    { timeout: 12000, maximumAge: 30000, enableHighAccuracy: false }
+  );
+}
+
+function showNearestOffices(lat, lng, keywords) {
+  // 優先篩選與此補助相關的辦理地點類型
+  let pool = OFFICE_DB;
+  const isPublicOffice = keywords.some(k => k.includes('公所') || k.includes('社會'));
+  const isEmployment   = keywords.some(k => k.includes('就業') || k.includes('勞動'));
+  const isFarm         = keywords.some(k => k.includes('農會') || k.includes('農保'));
+
+  if (isFarm)       pool = OFFICE_DB.filter(o => o.key === '農會' || o.key === '社會局');
+  else if (isEmployment) pool = OFFICE_DB.filter(o => o.key === '就業服務' || o.key === '社會局');
+  else              pool = OFFICE_DB.filter(o => o.key === '社會局');
+
+  const sorted = pool.map(o => ({
+    ...o, dist: Math.round(haversine(lat, lng, o.lat, o.lng) * 10) / 10
+  })).sort((a, b) => a.dist - b.dist).slice(0, 3);
+
+  // 自動展示最近那個地點的地圖
+  showOnEmbed(sorted[0].name, sorted[0].lat, sorted[0].lng);
+
+  const el = document.getElementById('map-nearest');
+  el.innerHTML = `<div class="map-nearest-label">📌 距你最近的申辦地點（由近到遠）</div>` +
+    sorted.map((o, i) => `
+      <div class="map-place-card">
+        <div class="mpc-icon">${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</div>
+        <div style="flex:1">
+          <div class="mpc-name">${o.name}</div>
+          <div class="mpc-addr">${o.addr}</div>
+          <span class="mpc-dist">📏 直線距離約 ${o.dist} 公里</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            <button class="map-nav-btn" onclick="openNavigation('${o.name}','${o.addr}')">🗺️ Google 導航前往</button>
+            <button class="map-nav-btn" style="background:var(--yellow-soft)" onclick="showOnEmbed('${o.name}',${o.lat},${o.lng})">📌 地圖預覽</button>
+          </div>
+        </div>
+      </div>`).join('');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/** 開啟 Google Maps 導航（iOS Safari 支援） */
+function openNavigation(name, addr) {
+  const dest = encodeURIComponent(name + ' ' + addr);
+  // iOS 優先開 Apple Maps，Android/其他開 Google Maps
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    // Apple Maps 導航
+    window.open(`maps://?q=${dest}`, '_blank');
+    // 若 1 秒後還在頁面，改開 Google Maps
+    setTimeout(() => {
+      window.open(`https://maps.google.com/maps?daddr=${dest}`, '_blank');
+    }, 1000);
+  } else {
+    window.open(`https://maps.google.com/maps?daddr=${dest}&travelmode=transit`, '_blank');
+  }
+}
+
+/** 在 iframe 嵌入地圖預覽 */
+function showOnEmbed(name, lat, lng) {
+  const container = document.getElementById('map-container');
+  const iframe    = document.getElementById('map-iframe');
+  const q = encodeURIComponent(name);
+  if (lat && lng) {
+    iframe.src = `https://maps.google.com/maps?q=${q}&ll=${lat},${lng}&z=16&output=embed&hl=zh-TW`;
+  } else {
+    iframe.src = `https://maps.google.com/maps?q=${q}&z=15&output=embed&hl=zh-TW`;
+  }
+  container.style.display = 'block';
+  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showMapStatus(msg) {
+  const el = document.getElementById('map-status');
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371, toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ══ 手機搜尋 overlay ══
+function openSearchMobile(e) {
+  e.preventDefault();
+  document.getElementById('overlay-search').classList.add('open');
+  setTimeout(() => document.getElementById('mobile-search-input').focus(), 100);
+}
+
+function liveSearchMobile(val) {
+  val = val.trim().toLowerCase();
+  const box = document.getElementById('mobile-search-results');
+  if (!val || val.length < 1) { box.innerHTML = ''; return; }
+  const hits = [];
+  Object.entries(DATA).forEach(([cat, catData]) => {
+    catData.items.forEach((item, idx) => {
+      if (item.name.toLowerCase().includes(val) || catData.title.toLowerCase().includes(val))
+        hits.push({ cat, idx, item, catData });
+    });
+  });
+  if (!hits.length) { box.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 4px">找不到相符項目</div>'; return; }
+  box.innerHTML = hits.map(({cat,idx,item,catData}) =>
+    `<div class="modal-list-item" style="border-radius:12px;margin-bottom:4px"
+      onclick="currentCat='${cat}';closeModal('overlay-search');openDetailModal(${idx})">
+      <div class="ml-left">
+        <span style="font-size:18px">${catData.icon}</span>
+        <div><div style="font-size:14px;font-weight:600">${item.name}</div>
+        <div style="font-size:12px;color:var(--muted)">${item.sub}</div></div>
+      </div><span class="ml-arrow">›</span></div>`
+  ).join('');
+}
+
+// ══ 底部 Tab Bar 高亮 ══
+function setTabActive(el) {
+  document.querySelectorAll('.mobile-tabbar a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function switchTab(name) {
+  const tabs = ['intro','process','docs','map'];
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i]===name));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ══════════════════════════════════════════
+// 多語言系統
+// ══════════════════════════════════════════
+const LANGS = {
+  zh: {
+    flag:'🇹🇼', label:'繁中',
+    nav_cat:'補助類別', nav_feat:'精選補助', nav_hot:'諮詢專線',
+    hero_badge:'✦ 全台社會福利補助整合平台',
+    hero_h1:'找到<em>最適合你</em>的<br>社會補助資源',
+    hero_p:'整合政府各類社會福利補助，快速查詢申請方式、必備文件與洽辦地點',
+    search_btn:'搜尋', search_ph:'搜尋補助名稱，例如：老農津貼、育兒補助…',
+    sec_cat:'補助類別', sec_feat:'精選補助項目', sec_hot:'重要諮詢專線',
+    tab_intro:'簡介', tab_proc:'流程', tab_docs:'必備文件', tab_map:'洽辦地點',
+    intro_h:'補助說明', proc_h:'申請步驟', docs_h:'需備文件', offices_h:'洽辦地點一覽',
+    locate_btn:'📍 偵測位置，找最近辦理地點',
+    locate_ok:'✅ 已取得位置', locate_retry:'📍 重試定位',
+    locating:'📡 正在取得您的位置，請稍候…',
+    map_banner:'💡 偵測你的位置後，會自動找到距離最近的<strong>申請辦理地點</strong>並提供導航',
+    nearest_label:'📌 距你最近的申辦地點（由近到遠）',
+    nav_go:'🗺️ Google 導航前往', map_preview:'📌 地圖預覽',
+    offices_all:'洽辦地點一覽', nav_open:'🗺️ 開啟導航',
+    footer_text:'補助小幫手 · 資料來源：衛生福利部、各地方政府社會局<br>如有疑問請洽各地公所社會課或撥打 <a href="tel:1957">1957 社福諮詢專線</a>',
+    mob_cat:'類別', mob_feat:'精選', mob_hot:'專線', mob_search:'搜尋',
+    search_title:'🔍 搜尋補助', search_inp_ph:'輸入補助名稱或類別…',
+    no_result:'找不到相符的補助項目', no_result_m:'找不到相符項目',
+    dist_label:'📏 直線距離約',  dist_unit:'公里',
+    geo_deny:'請允許瀏覽器存取位置權限', geo_net:'無法取得位置，請檢查網路',
+    geo_timeout:'定位逾時，請再試一次', geo_fallback:'可手動點選下方地點開啟導航',
+  },
+  en: {
+    flag:'🇺🇸', label:'EN',
+    nav_cat:'Categories', nav_feat:'Featured', nav_hot:'Hotlines',
+    hero_badge:'✦ Taiwan Social Welfare Benefits Platform',
+    hero_h1:'Find the <em>right subsidies</em><br>for you',
+    hero_p:'Browse government welfare programs — check eligibility, steps, documents & nearest office.',
+    search_btn:'Search', search_ph:'Search benefits, e.g. elderly allowance, childcare…',
+    sec_cat:'Categories', sec_feat:'Featured Benefits', sec_hot:'Important Hotlines',
+    tab_intro:'Overview', tab_proc:'Steps', tab_docs:'Documents', tab_map:'Offices',
+    intro_h:'About This Benefit', proc_h:'Application Steps', docs_h:'Required Documents', offices_h:'Offices',
+    locate_btn:'📍 Find nearest office', locate_ok:'✅ Location found', locate_retry:'📍 Retry',
+    locating:'📡 Getting your location…',
+    map_banner:'💡 After locating you, we\'ll show the <strong>nearest application office</strong> with navigation.',
+    nearest_label:'📌 Nearest offices (closest first)',
+    nav_go:'🗺️ Navigate (Google Maps)', map_preview:'📌 Preview on map',
+    offices_all:'All Offices', nav_open:'🗺️ Navigate',
+    footer_text:'Subsidy Helper · Data: Ministry of Health and Welfare, local governments.<br>Questions? Call <a href="tel:1957">1957</a> (social welfare hotline).',
+    mob_cat:'Categories', mob_feat:'Featured', mob_hot:'Hotlines', mob_search:'Search',
+    search_title:'🔍 Search', search_inp_ph:'Type benefit name or category…',
+    no_result:'No matching benefits found', no_result_m:'No results',
+    dist_label:'📏 Approx.', dist_unit:'km',
+    geo_deny:'Please allow location access', geo_net:'Cannot get location, check network',
+    geo_timeout:'Location timeout, please retry', geo_fallback:'Or tap an office below to navigate',
+  },
+  vi: {
+    flag:'🇻🇳', label:'VI',
+    nav_cat:'Danh mục', nav_feat:'Nổi bật', nav_hot:'Đường dây nóng',
+    hero_badge:'✦ Nền tảng trợ cấp phúc lợi xã hội Đài Loan',
+    hero_h1:'Tìm <em>trợ cấp phù hợp</em><br>với bạn',
+    hero_p:'Tra cứu các chương trình trợ cấp chính phủ — điều kiện, thủ tục, hồ sơ & văn phòng gần nhất.',
+    search_btn:'Tìm kiếm', search_ph:'Tìm trợ cấp, ví dụ: trợ cấp người cao tuổi…',
+    sec_cat:'Danh mục trợ cấp', sec_feat:'Trợ cấp nổi bật', sec_hot:'Đường dây hỗ trợ',
+    tab_intro:'Giới thiệu', tab_proc:'Thủ tục', tab_docs:'Hồ sơ', tab_map:'Văn phòng',
+    intro_h:'Về trợ cấp này', proc_h:'Các bước nộp đơn', docs_h:'Hồ sơ cần thiết', offices_h:'Danh sách văn phòng',
+    locate_btn:'📍 Tìm văn phòng gần nhất', locate_ok:'✅ Đã xác định vị trí', locate_retry:'📍 Thử lại',
+    locating:'📡 Đang lấy vị trí của bạn…',
+    map_banner:'💡 Sau khi xác định vị trí, chúng tôi sẽ hiển thị <strong>văn phòng nộp đơn gần nhất</strong> kèm điều hướng.',
+    nearest_label:'📌 Văn phòng gần bạn nhất (từ gần đến xa)',
+    nav_go:'🗺️ Điều hướng (Google Maps)', map_preview:'📌 Xem trên bản đồ',
+    offices_all:'Tất cả văn phòng', nav_open:'🗺️ Điều hướng',
+    footer_text:'Trợ Lý Trợ Cấp · Dữ liệu: Bộ Y tế và Phúc lợi, chính quyền địa phương.<br>Gọi <a href="tel:1957">1957</a> để được hỗ trợ.',
+    mob_cat:'Danh mục', mob_feat:'Nổi bật', mob_hot:'Hotline', mob_search:'Tìm',
+    search_title:'🔍 Tìm kiếm', search_inp_ph:'Nhập tên trợ cấp hoặc danh mục…',
+    no_result:'Không tìm thấy kết quả', no_result_m:'Không có kết quả',
+    dist_label:'📏 Khoảng', dist_unit:'km',
+    geo_deny:'Vui lòng cho phép truy cập vị trí', geo_net:'Không lấy được vị trí',
+    geo_timeout:'Hết thời gian, vui lòng thử lại', geo_fallback:'Hoặc chọn văn phòng bên dưới',
+  },
+  id: {
+    flag:'🇮🇩', label:'ID',
+    nav_cat:'Kategori', nav_feat:'Unggulan', nav_hot:'Hotline',
+    hero_badge:'✦ Platform Bantuan Sosial Taiwan',
+    hero_h1:'Temukan <em>bantuan yang tepat</em><br>untuk Anda',
+    hero_p:'Cari program bantuan pemerintah — syarat, prosedur, dokumen & kantor terdekat.',
+    search_btn:'Cari', search_ph:'Cari bantuan, mis: tunjangan lansia, subsidi anak…',
+    sec_cat:'Kategori Bantuan', sec_feat:'Bantuan Unggulan', sec_hot:'Hotline Penting',
+    tab_intro:'Ringkasan', tab_proc:'Langkah', tab_docs:'Dokumen', tab_map:'Kantor',
+    intro_h:'Tentang Bantuan Ini', proc_h:'Langkah Pengajuan', docs_h:'Dokumen yang Diperlukan', offices_h:'Daftar Kantor',
+    locate_btn:'📍 Temukan kantor terdekat', locate_ok:'✅ Lokasi ditemukan', locate_retry:'📍 Coba lagi',
+    locating:'📡 Mendapatkan lokasi Anda…',
+    map_banner:'💡 Setelah lokasi ditemukan, kami akan menampilkan <strong>kantor pengajuan terdekat</strong> beserta navigasi.',
+    nearest_label:'📌 Kantor terdekat dari Anda (terdekat lebih dulu)',
+    nav_go:'🗺️ Navigasi (Google Maps)', map_preview:'📌 Pratinjau peta',
+    offices_all:'Semua Kantor', nav_open:'🗺️ Navigasi',
+    footer_text:'Asisten Bantuan · Data: Kementerian Kesehatan & Kesejahteraan, pemerintah daerah.<br>Hubungi <a href="tel:1957">1957</a> untuk bantuan.',
+    mob_cat:'Kategori', mob_feat:'Unggulan', mob_hot:'Hotline', mob_search:'Cari',
+    search_title:'🔍 Cari', search_inp_ph:'Masukkan nama bantuan atau kategori…',
+    no_result:'Tidak ada bantuan yang sesuai', no_result_m:'Tidak ada hasil',
+    dist_label:'📏 Sekitar', dist_unit:'km',
+    geo_deny:'Izinkan akses lokasi', geo_net:'Tidak dapat mengambil lokasi',
+    geo_timeout:'Waktu habis, coba lagi', geo_fallback:'Atau pilih kantor di bawah',
+  },
+  th: {
+    flag:'🇹🇭', label:'TH',
+    nav_cat:'หมวดหมู่', nav_feat:'แนะนำ', nav_hot:'สายด่วน',
+    hero_badge:'✦ แพลตฟอร์มสวัสดิการสังคมไต้หวัน',
+    hero_h1:'ค้นหา<em>เงินอุดหนุนที่เหมาะกับคุณ</em><br>',
+    hero_p:'รวบรวมสวัสดิการภาครัฐ — คุณสมบัติ ขั้นตอน เอกสาร และสำนักงานใกล้บ้าน',
+    search_btn:'ค้นหา', search_ph:'ค้นหา เช่น เบี้ยยังชีพผู้สูงอายุ เงินอุดหนุนเด็ก…',
+    sec_cat:'หมวดหมู่', sec_feat:'สวัสดิการแนะนำ', sec_hot:'สายด่วนสำคัญ',
+    tab_intro:'ภาพรวม', tab_proc:'ขั้นตอน', tab_docs:'เอกสาร', tab_map:'สำนักงาน',
+    intro_h:'เกี่ยวกับสวัสดิการนี้', proc_h:'ขั้นตอนการยื่น', docs_h:'เอกสารที่ต้องใช้', offices_h:'รายชื่อสำนักงาน',
+    locate_btn:'📍 หาสำนักงานใกล้ที่สุด', locate_ok:'✅ พบตำแหน่งของคุณ', locate_retry:'📍 ลองอีกครั้ง',
+    locating:'📡 กำลังระบุตำแหน่ง…',
+    map_banner:'💡 หลังระบุตำแหน่ง จะแสดง<strong>สำนักงานยื่นที่ใกล้ที่สุด</strong>พร้อมนำทาง',
+    nearest_label:'📌 สำนักงานใกล้คุณที่สุด (จากใกล้ไปไกล)',
+    nav_go:'🗺️ นำทาง (Google Maps)', map_preview:'📌 ดูบนแผนที่',
+    offices_all:'สำนักงานทั้งหมด', nav_open:'🗺️ นำทาง',
+    footer_text:'ผู้ช่วยสวัสดิการ · ข้อมูล: กระทรวงสาธารณสุขและสวัสดิการ<br>โทร <a href="tel:1957">1957</a>',
+    mob_cat:'หมวดหมู่', mob_feat:'แนะนำ', mob_hot:'สายด่วน', mob_search:'ค้นหา',
+    search_title:'🔍 ค้นหา', search_inp_ph:'ป้อนชื่อสวัสดิการหรือหมวดหมู่…',
+    no_result:'ไม่พบรายการที่ตรงกัน', no_result_m:'ไม่พบผลลัพธ์',
+    dist_label:'📏 ประมาณ', dist_unit:'กม.',
+    geo_deny:'กรุณาอนุญาตเข้าถึงตำแหน่ง', geo_net:'ไม่สามารถรับตำแหน่งได้',
+    geo_timeout:'หมดเวลา โปรดลองอีกครั้ง', geo_fallback:'หรือเลือกสำนักงานด้านล่าง',
+  },
+  ja: {
+    flag:'🇯🇵', label:'日本語',
+    nav_cat:'カテゴリー', nav_feat:'おすすめ', nav_hot:'相談窓口',
+    hero_badge:'✦ 台湾社会福祉補助金プラットフォーム',
+    hero_h1:'あなたに<em>最適な補助金</em>を<br>見つけましょう',
+    hero_p:'台湾政府の各種社会福祉補助金を一括検索。申請方法・必要書類・最寄り窓口を確認できます。',
+    search_btn:'検索', search_ph:'補助金名を検索。例：農業者老齢年金、育児手当…',
+    sec_cat:'補助金カテゴリー', sec_feat:'おすすめ補助金', sec_hot:'重要相談窓口',
+    tab_intro:'概要', tab_proc:'手順', tab_docs:'必要書類', tab_map:'窓口',
+    intro_h:'この補助金について', proc_h:'申請手順', docs_h:'必要書類', offices_h:'窓口一覧',
+    locate_btn:'📍 最寄り窓口を探す', locate_ok:'✅ 位置情報取得済み', locate_retry:'📍 再試行',
+    locating:'📡 位置情報を取得中…',
+    map_banner:'💡 位置情報取得後、最寄りの<strong>申請窓口</strong>をナビゲーション付きで表示します。',
+    nearest_label:'📌 最寄りの申請窓口（近い順）',
+    nav_go:'🗺️ Googleマップで案内', map_preview:'📌 地図でプレビュー',
+    offices_all:'窓口一覧', nav_open:'🗺️ ナビ',
+    footer_text:'補助金ヘルパー · データ：衛生福利部、各地方政府<br>お問い合わせ：<a href="tel:1957">1957</a>',
+    mob_cat:'カテゴリ', mob_feat:'おすすめ', mob_hot:'窓口', mob_search:'検索',
+    search_title:'🔍 検索', search_inp_ph:'補助金名またはカテゴリを入力…',
+    no_result:'該当する補助金が見つかりません', no_result_m:'結果なし',
+    dist_label:'📏 約', dist_unit:'km',
+    geo_deny:'位置情報へのアクセスを許可してください', geo_net:'位置情報を取得できません',
+    geo_timeout:'タイムアウト、再試行してください', geo_fallback:'または以下の窓口をタップしてください',
+  },
+  ko: {
+    flag:'🇰🇷', label:'한국어',
+    nav_cat:'카테고리', nav_feat:'추천', nav_hot:'상담전화',
+    hero_badge:'✦ 대만 사회복지 보조금 플랫폼',
+    hero_h1:'나에게 <em>맞는 보조금</em>을<br>찾아보세요',
+    hero_p:'대만 정부의 각종 복지 보조금을 한눈에 — 자격 조건, 신청 절차, 필요 서류, 가까운 기관.',
+    search_btn:'검색', search_ph:'보조금 이름 검색. 예: 노인 수당, 육아 보조금…',
+    sec_cat:'보조금 카테고리', sec_feat:'추천 보조금', sec_hot:'주요 상담전화',
+    tab_intro:'개요', tab_proc:'신청 절차', tab_docs:'필요 서류', tab_map:'담당 기관',
+    intro_h:'이 보조금에 대해', proc_h:'신청 절차', docs_h:'필요 서류', offices_h:'담당 기관 목록',
+    locate_btn:'📍 가장 가까운 기관 찾기', locate_ok:'✅ 위치 확인 완료', locate_retry:'📍 다시 시도',
+    locating:'📡 위치 정보를 가져오는 중…',
+    map_banner:'💡 위치 확인 후, 가장 가까운 <strong>신청 기관</strong>과 내비게이션을 안내해드립니다.',
+    nearest_label:'📌 가장 가까운 기관 (가까운 순)',
+    nav_go:'🗺️ Google 지도로 안내', map_preview:'📌 지도 미리보기',
+    offices_all:'기관 목록', nav_open:'🗺️ 안내',
+    footer_text:'보조금 도우미 · 자료: 보건복지부, 각 지방 정부<br>문의: <a href="tel:1957">1957</a>',
+    mob_cat:'카테고리', mob_feat:'추천', mob_hot:'전화', mob_search:'검색',
+    search_title:'🔍 검색', search_inp_ph:'보조금 이름 또는 카테고리 입력…',
+    no_result:'해당하는 보조금을 찾을 수 없습니다', no_result_m:'결과 없음',
+    dist_label:'📏 약', dist_unit:'km',
+    geo_deny:'위치 접근 권한을 허용해주세요', geo_net:'위치를 가져올 수 없습니다',
+    geo_timeout:'시간 초과, 다시 시도해주세요', geo_fallback:'아래 기관을 탭하여 안내받으세요',
+  }
+};
+
+let curLang = 'zh';
+
+function t(key) { return LANGS[curLang][key] || LANGS.zh[key] || key; }
+
+function setLang(lang) {
+  curLang = lang;
+  const L = LANGS[lang];
+  // 語言按鈕文字
+  document.getElementById('lang-btn').textContent = `🌐 ${L.label}`;
+  // 關閉選單
+  document.getElementById('lang-picker').classList.remove('open');
+  document.getElementById('lang-btn').classList.remove('active');
+  // 標記當前選中
+  document.querySelectorAll('#lang-picker button').forEach(b => {
+    b.classList.toggle('cur', b.textContent.trim().endsWith(L.label) || b.getAttribute('onclick') === `setLang('${lang}')`);
+  });
+  // 更新所有 data-i18n 元素
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (L[key] !== undefined) el.innerHTML = L[key];
+  });
+  // placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (L[key] !== undefined) el.placeholder = L[key];
+  });
+  // 更新 Section 標題
+  document.querySelectorAll('[data-i18n-sec]').forEach(el => {
+    const key = el.getAttribute('data-i18n-sec');
+    if (L[key] !== undefined) el.textContent = L[key];
+  });
+  // 更新底部 Tab Bar
+  const tb = document.querySelectorAll('.mobile-tabbar a');
+  const tbKeys = ['mob_cat','mob_feat','mob_hot','mob_search'];
+  tb.forEach((a, i) => {
+    const icon = a.querySelector('.tb-icon');
+    const iconText = icon ? icon.outerHTML : '';
+    a.innerHTML = iconText + L[tbKeys[i]];
+  });
+  // 重新掛 icon
+  document.querySelectorAll('.mobile-tabbar a .tb-icon').forEach((el, i) => {
+    const icons = ['🏷️','⭐','📞','🔍'];
+    el.textContent = icons[i];
+  });
+  // 更新 footer
+  const footer = document.querySelector('footer');
+  if (footer) footer.innerHTML = L.footer_text;
+  // 更新 html lang
+  document.documentElement.lang = {zh:'zh-TW',en:'en',vi:'vi',id:'id',th:'th',ja:'ja',ko:'ko'}[lang] || 'zh-TW';
+}
+
+function toggleLangPicker(e) {
+  e.stopPropagation();
+  const picker = document.getElementById('lang-picker');
+  const btn    = document.getElementById('lang-btn');
+  picker.classList.toggle('open');
+  btn.classList.toggle('active', picker.classList.contains('open'));
+}
+// 點擊其他地方關閉
+document.addEventListener('click', () => {
+  document.getElementById('lang-picker')?.classList.remove('open');
+  document.getElementById('lang-btn')?.classList.remove('active');
+});
+</script>
+</body>
+</html>
