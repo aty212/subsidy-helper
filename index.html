@@ -547,9 +547,9 @@
   </div>
   <div id="search-results" style="text-align:left;margin-top:10px;"></div>
   <div class="stats">
-    <div class="stat-item"><div class="num">8</div><div class="label">補助類別</div></div>
-    <div class="stat-item"><div class="num">20+</div><div class="label">補助項目</div></div>
-    <div class="stat-item"><div class="num">即時</div><div class="label">資料更新</div></div>
+    <div class="stat-item"><div class="num">8</div><div class="label" data-i18n="stat_cat">補助類別</div></div>
+    <div class="stat-item"><div class="num">20+</div><div class="label" data-i18n="stat_item">補助項目</div></div>
+    <div class="stat-item"><div class="num" data-i18n="stat_rt">即時</div><div class="label" data-i18n="stat_upd">資料更新</div></div>
   </div>
 </div>
 
@@ -565,7 +565,7 @@
 <!-- Featured -->
 <div class="section" id="featured">
   <div class="section-header">
-    <div class="section-title">精選補助項目</div>
+    <div class="section-title" data-i18n="sec_feat">精選補助項目</div>
     <div class="section-line"></div>
   </div>
   <div id="featured-list"></div>
@@ -574,20 +574,13 @@
 <!-- Hotline -->
 <div class="section" id="hotline">
   <div class="section-header">
-    <div class="section-title">重要諮詢專線</div>
+    <div class="section-title" data-i18n="sec_hot">重要諮詢專線</div>
     <div class="section-line"></div>
   </div>
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-    <div class="office-card"><strong>社福諮詢專線</strong><span>☎ 1957（全年 24 小時）</span></div>
-    <div class="office-card"><strong>長照服務專線</strong><span>☎ 1966</span></div>
-    <div class="office-card"><strong>家暴性侵專線</strong><span>☎ 113</span></div>
-    <div class="office-card"><strong>移民署服務站</strong><span>☎ 0800-024-111</span></div>
-    <div class="office-card"><strong>原民會服務專線</strong><span>☎ 0800-068-752</span></div>
-    <div class="office-card"><strong>勞工局諮詢專線</strong><span>☎ 1955</span></div>
-  </div>
+  <div id="hotline-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"></div>
 </div>
 
-<footer>
+<footer data-i18n="footer_text">
   補助小幫手 · 資料來源：衛生福利部、各地方政府社會局<br>
   如有疑問請洽各地公所社會課或撥打 <a href="tel:1957">1957 社福諮詢專線</a>
 </footer>
@@ -598,7 +591,12 @@
     <div class="modal-handle"></div>
     <div class="modal-header">
       <h2 id="modal-list-title"></h2>
-      <button class="modal-close" onclick="closeModal('overlay-list')">✕</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="modal-close" onclick="closeModal('overlay-list')" title="返回主頁" style="width:auto;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;">
+          ← <span data-i18n="back_home">主頁</span>
+        </button>
+        <button class="modal-close" onclick="closeModal('overlay-list')">✕</button>
+      </div>
     </div>
     <div id="modal-list-body"></div>
   </div>
@@ -609,15 +607,27 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="detail-hero">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <button onclick="closeModal('overlay-detail');document.getElementById('overlay-list').classList.add('open')"
+          style="background:rgba(255,255,255,0.5);border:none;border-radius:8px;
+                 padding:5px 10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer">
+          ← <span data-i18n="back_list">返回列表</span>
+        </button>
+        <button onclick="closeModal('overlay-detail')"
+          style="background:rgba(255,255,255,0.5);border:none;border-radius:8px;
+                 padding:5px 10px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer">
+          ✕ <span data-i18n="close">關閉</span>
+        </button>
+      </div>
       <div class="dh-tag" id="detail-cat-tag"></div>
       <h2 id="detail-name"></h2>
       <p id="detail-sub"></p>
     </div>
     <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab('intro')">簡介</button>
-      <button class="tab-btn" onclick="switchTab('process')">流程</button>
-      <button class="tab-btn" onclick="switchTab('docs')">必備文件</button>
-      <button class="tab-btn" onclick="switchTab('map')">洽辦地點</button>
+      <button class="tab-btn active" data-i18n="tab_intro" onclick="switchTab('intro')">簡介</button>
+      <button class="tab-btn" data-i18n="tab_proc" onclick="switchTab('process')">流程</button>
+      <button class="tab-btn" data-i18n="tab_docs" onclick="switchTab('docs')">必備文件</button>
+      <button class="tab-btn" data-i18n="tab_map" onclick="switchTab('map')">洽辦地點</button>
     </div>
     <div id="tab-intro"   class="tab-content active"></div>
     <div id="tab-process" class="tab-content"></div>
@@ -629,10 +639,15 @@
 <!-- 搜尋 overlay（手機用） -->
 <div class="overlay" id="overlay-search" onclick="closeIfBg(event,'overlay-search')" style="align-items:flex-start;padding-top:60px">
   <div class="modal" style="border-radius:20px;max-height:80vh;padding:20px">
-    <div style="font-size:16px;font-weight:800;margin-bottom:12px;">🔍 搜尋補助</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:16px;font-weight:800;" data-i18n="search_title">🔍 搜尋補助</div>
+      <button onclick="closeModal('overlay-search')" class="modal-close">✕</button>
+    </div>
     <div class="search-wrap" style="margin-bottom:12px;">
       <span style="color:var(--muted);">🔍</span>
-      <input id="mobile-search-input" type="text" placeholder="輸入補助名稱或類別…"
+      <input id="mobile-search-input" type="text"
+        data-i18n-placeholder="search_inp_ph"
+        placeholder="輸入補助名稱或類別…"
         oninput="liveSearchMobile(this.value)" style="font-size:16px;" />
     </div>
     <div id="mobile-search-results"></div>
@@ -1133,6 +1148,75 @@ function switchTab(name) {
 // ══════════════════════════════════════════
 // 多語言系統
 // ══════════════════════════════════════════
+// 諮詢專線資料（多語言）
+const HOTLINES = {
+  zh: [
+    {name:'社福諮詢專線', num:'☎ 1957（全年 24 小時）'},
+    {name:'長照服務專線', num:'☎ 1966'},
+    {name:'家暴性侵專線', num:'☎ 113'},
+    {name:'移民署服務站', num:'☎ 0800-024-111'},
+    {name:'原民會服務專線', num:'☎ 0800-068-752'},
+    {name:'勞工局諮詢專線', num:'☎ 1955'},
+  ],
+  en: [
+    {name:'Social Welfare Hotline', num:'☎ 1957 (24hr)'},
+    {name:'Long-term Care Hotline', num:'☎ 1966'},
+    {name:'Domestic Violence Hotline', num:'☎ 113'},
+    {name:'Immigration Services', num:'☎ 0800-024-111'},
+    {name:'Indigenous Peoples Council', num:'☎ 0800-068-752'},
+    {name:'Labor Affairs Hotline', num:'☎ 1955'},
+  ],
+  vi: [
+    {name:'Đường dây phúc lợi xã hội', num:'☎ 1957 (24 giờ)'},
+    {name:'Đường dây chăm sóc dài hạn', num:'☎ 1966'},
+    {name:'Đường dây bạo lực gia đình', num:'☎ 113'},
+    {name:'Cục Di dân', num:'☎ 0800-024-111'},
+    {name:'Ủy ban Người bản địa', num:'☎ 0800-068-752'},
+    {name:'Đường dây lao động', num:'☎ 1955'},
+  ],
+  id: [
+    {name:'Hotline Kesejahteraan Sosial', num:'☎ 1957 (24 jam)'},
+    {name:'Hotline Perawatan Jangka Panjang', num:'☎ 1966'},
+    {name:'Hotline Kekerasan Rumah Tangga', num:'☎ 113'},
+    {name:'Kantor Imigrasi', num:'☎ 0800-024-111'},
+    {name:'Dewan Masyarakat Adat', num:'☎ 0800-068-752'},
+    {name:'Hotline Ketenagakerjaan', num:'☎ 1955'},
+  ],
+  th: [
+    {name:'สายด่วนสวัสดิการสังคม', num:'☎ 1957 (24 ชั่วโมง)'},
+    {name:'สายด่วนการดูแลระยะยาว', num:'☎ 1966'},
+    {name:'สายด่วนความรุนแรงในครอบครัว', num:'☎ 113'},
+    {name:'สำนักงานตรวจคนเข้าเมือง', num:'☎ 0800-024-111'},
+    {name:'สภาชนพื้นเมือง', num:'☎ 0800-068-752'},
+    {name:'สายด่วนแรงงาน', num:'☎ 1955'},
+  ],
+  ja: [
+    {name:'社会福祉相談窓口', num:'☎ 1957（24時間）'},
+    {name:'介護サービス窓口', num:'☎ 1966'},
+    {name:'DV・性暴力ホットライン', num:'☎ 113'},
+    {name:'移民署サービス窓口', num:'☎ 0800-024-111'},
+    {name:'原住民族委員会', num:'☎ 0800-068-752'},
+    {name:'労働局相談窓口', num:'☎ 1955'},
+  ],
+  ko: [
+    {name:'사회복지 상담전화', num:'☎ 1957 (24시간)'},
+    {name:'장기요양 서비스 전화', num:'☎ 1966'},
+    {name:'가정폭력 신고전화', num:'☎ 113'},
+    {name:'이민서비스 센터', num:'☎ 0800-024-111'},
+    {name:'원주민족 위원회', num:'☎ 0800-068-752'},
+    {name:'노동부 상담전화', num:'☎ 1955'},
+  ],
+};
+
+function renderHotlines(lang) {
+  const list = HOTLINES[lang] || HOTLINES.zh;
+  document.getElementById('hotline-grid').innerHTML = list.map(h =>
+    `<div class="office-card"><strong>${h.name}</strong><span>${h.num}</span></div>`
+  ).join('');
+}
+// 初始渲染
+renderHotlines('zh');
+
 const LANGS = {
   zh: {
     flag:'🇹🇼', label:'繁中',
@@ -1144,18 +1228,19 @@ const LANGS = {
     sec_cat:'補助類別', sec_feat:'精選補助項目', sec_hot:'重要諮詢專線',
     tab_intro:'簡介', tab_proc:'流程', tab_docs:'必備文件', tab_map:'洽辦地點',
     intro_h:'補助說明', proc_h:'申請步驟', docs_h:'需備文件', offices_h:'洽辦地點一覽',
-    locate_btn:'📍 偵測位置，找最近辦理地點',
-    locate_ok:'✅ 已取得位置', locate_retry:'📍 重試定位',
+    locate_btn:'📍 偵測位置，找最近辦理地點', locate_ok:'✅ 已取得位置', locate_retry:'📍 重試定位',
     locating:'📡 正在取得您的位置，請稍候…',
-    map_banner:'💡 偵測你的位置後，會自動找到距離最近的<strong>申請辦理地點</strong>並提供導航',
-    nearest_label:'📌 距你最近的申辦地點（由近到遠）',
+    map_banner:'💡 點下方按鈕，直接在 Google Maps 搜尋<strong>最近的申辦地點</strong>',
+    nearest_label:'📌 距你最近的申辦地點',
     nav_go:'🗺️ Google 導航前往', map_preview:'📌 地圖預覽',
-    offices_all:'洽辦地點一覽', nav_open:'🗺️ 開啟導航',
+    offices_all:'洽辦地點', nav_open:'🗺️ 開啟導航',
     footer_text:'補助小幫手 · 資料來源：衛生福利部、各地方政府社會局<br>如有疑問請洽各地公所社會課或撥打 <a href="tel:1957">1957 社福諮詢專線</a>',
     mob_cat:'類別', mob_feat:'精選', mob_hot:'專線', mob_search:'搜尋',
     search_title:'🔍 搜尋補助', search_inp_ph:'輸入補助名稱或類別…',
     no_result:'找不到相符的補助項目', no_result_m:'找不到相符項目',
-    dist_label:'📏 直線距離約',  dist_unit:'公里',
+    stat_cat:'補助類別', stat_item:'補助項目', stat_rt:'即時', stat_upd:'資料更新',
+    back_home:'主頁', back_list:'返回列表', close:'關閉',
+    dist_label:'📏 直線距離約', dist_unit:'公里',
     geo_deny:'請允許瀏覽器存取位置權限', geo_net:'無法取得位置，請檢查網路',
     geo_timeout:'定位逾時，請再試一次', geo_fallback:'可手動點選下方地點開啟導航',
   },
@@ -1164,23 +1249,25 @@ const LANGS = {
     nav_cat:'Categories', nav_feat:'Featured', nav_hot:'Hotlines',
     hero_badge:'✦ Taiwan Social Welfare Benefits Platform',
     hero_h1:'Find the <em>right subsidies</em><br>for you',
-    hero_p:'Browse government welfare programs — check eligibility, steps, documents & nearest office.',
+    hero_p:'Browse government welfare programs — eligibility, steps, documents & nearest office.',
     search_btn:'Search', search_ph:'Search benefits, e.g. elderly allowance, childcare…',
     sec_cat:'Categories', sec_feat:'Featured Benefits', sec_hot:'Important Hotlines',
     tab_intro:'Overview', tab_proc:'Steps', tab_docs:'Documents', tab_map:'Offices',
     intro_h:'About This Benefit', proc_h:'Application Steps', docs_h:'Required Documents', offices_h:'Offices',
     locate_btn:'📍 Find nearest office', locate_ok:'✅ Location found', locate_retry:'📍 Retry',
     locating:'📡 Getting your location…',
-    map_banner:'💡 After locating you, we\'ll show the <strong>nearest application office</strong> with navigation.',
+    map_banner:'💡 Tap below to search the <strong>nearest application office</strong> on Google Maps.',
     nearest_label:'📌 Nearest offices (closest first)',
     nav_go:'🗺️ Navigate (Google Maps)', map_preview:'📌 Preview on map',
-    offices_all:'All Offices', nav_open:'🗺️ Navigate',
-    footer_text:'Subsidy Helper · Data: Ministry of Health and Welfare, local governments.<br>Questions? Call <a href="tel:1957">1957</a> (social welfare hotline).',
+    offices_all:'Offices', nav_open:'🗺️ Navigate',
+    footer_text:'Subsidy Helper · Data: Ministry of Health and Welfare.<br>Questions? Call <a href="tel:1957">1957</a>.',
     mob_cat:'Categories', mob_feat:'Featured', mob_hot:'Hotlines', mob_search:'Search',
     search_title:'🔍 Search', search_inp_ph:'Type benefit name or category…',
     no_result:'No matching benefits found', no_result_m:'No results',
+    stat_cat:'Categories', stat_item:'Benefits', stat_rt:'Live', stat_upd:'Data Updates',
+    back_home:'Home', back_list:'Back to list', close:'Close',
     dist_label:'📏 Approx.', dist_unit:'km',
-    geo_deny:'Please allow location access', geo_net:'Cannot get location, check network',
+    geo_deny:'Please allow location access', geo_net:'Cannot get location',
     geo_timeout:'Location timeout, please retry', geo_fallback:'Or tap an office below to navigate',
   },
   vi: {
@@ -1195,14 +1282,16 @@ const LANGS = {
     intro_h:'Về trợ cấp này', proc_h:'Các bước nộp đơn', docs_h:'Hồ sơ cần thiết', offices_h:'Danh sách văn phòng',
     locate_btn:'📍 Tìm văn phòng gần nhất', locate_ok:'✅ Đã xác định vị trí', locate_retry:'📍 Thử lại',
     locating:'📡 Đang lấy vị trí của bạn…',
-    map_banner:'💡 Sau khi xác định vị trí, chúng tôi sẽ hiển thị <strong>văn phòng nộp đơn gần nhất</strong> kèm điều hướng.',
-    nearest_label:'📌 Văn phòng gần bạn nhất (từ gần đến xa)',
-    nav_go:'🗺️ Điều hướng (Google Maps)', map_preview:'📌 Xem trên bản đồ',
-    offices_all:'Tất cả văn phòng', nav_open:'🗺️ Điều hướng',
-    footer_text:'Trợ Lý Trợ Cấp · Dữ liệu: Bộ Y tế và Phúc lợi, chính quyền địa phương.<br>Gọi <a href="tel:1957">1957</a> để được hỗ trợ.',
+    map_banner:'💡 Nhấn nút để tìm kiếm <strong>văn phòng nộp đơn gần nhất</strong> trên Google Maps.',
+    nearest_label:'📌 Văn phòng gần bạn nhất',
+    nav_go:'🗺️ Chỉ đường (Google Maps)', map_preview:'📌 Xem trên bản đồ',
+    offices_all:'Văn phòng', nav_open:'🗺️ Chỉ đường',
+    footer_text:'Trợ Lý Trợ Cấp · Dữ liệu: Bộ Y tế và Phúc lợi.<br>Gọi <a href="tel:1957">1957</a> để được hỗ trợ.',
     mob_cat:'Danh mục', mob_feat:'Nổi bật', mob_hot:'Hotline', mob_search:'Tìm',
     search_title:'🔍 Tìm kiếm', search_inp_ph:'Nhập tên trợ cấp hoặc danh mục…',
     no_result:'Không tìm thấy kết quả', no_result_m:'Không có kết quả',
+    stat_cat:'Danh mục', stat_item:'Trợ cấp', stat_rt:'Cập nhật', stat_upd:'Dữ liệu',
+    back_home:'Trang chủ', back_list:'Quay lại', close:'Đóng',
     dist_label:'📏 Khoảng', dist_unit:'km',
     geo_deny:'Vui lòng cho phép truy cập vị trí', geo_net:'Không lấy được vị trí',
     geo_timeout:'Hết thời gian, vui lòng thử lại', geo_fallback:'Hoặc chọn văn phòng bên dưới',
@@ -1212,21 +1301,23 @@ const LANGS = {
     nav_cat:'Kategori', nav_feat:'Unggulan', nav_hot:'Hotline',
     hero_badge:'✦ Platform Bantuan Sosial Taiwan',
     hero_h1:'Temukan <em>bantuan yang tepat</em><br>untuk Anda',
-    hero_p:'Cari program bantuan pemerintah — syarat, prosedur, dokumen & kantor terdekat.',
+    hero_p:'Cari program bantuan pemerintah — syarat, prosedur, dokumen dan kantor terdekat.',
     search_btn:'Cari', search_ph:'Cari bantuan, mis: tunjangan lansia, subsidi anak…',
     sec_cat:'Kategori Bantuan', sec_feat:'Bantuan Unggulan', sec_hot:'Hotline Penting',
     tab_intro:'Ringkasan', tab_proc:'Langkah', tab_docs:'Dokumen', tab_map:'Kantor',
     intro_h:'Tentang Bantuan Ini', proc_h:'Langkah Pengajuan', docs_h:'Dokumen yang Diperlukan', offices_h:'Daftar Kantor',
     locate_btn:'📍 Temukan kantor terdekat', locate_ok:'✅ Lokasi ditemukan', locate_retry:'📍 Coba lagi',
     locating:'📡 Mendapatkan lokasi Anda…',
-    map_banner:'💡 Setelah lokasi ditemukan, kami akan menampilkan <strong>kantor pengajuan terdekat</strong> beserta navigasi.',
-    nearest_label:'📌 Kantor terdekat dari Anda (terdekat lebih dulu)',
-    nav_go:'🗺️ Navigasi (Google Maps)', map_preview:'📌 Pratinjau peta',
-    offices_all:'Semua Kantor', nav_open:'🗺️ Navigasi',
-    footer_text:'Asisten Bantuan · Data: Kementerian Kesehatan & Kesejahteraan, pemerintah daerah.<br>Hubungi <a href="tel:1957">1957</a> untuk bantuan.',
+    map_banner:'💡 Ketuk tombol untuk mencari <strong>kantor pengajuan terdekat</strong> di Google Maps.',
+    nearest_label:'📌 Kantor terdekat dari Anda',
+    nav_go:'🗺️ Navigasi (Google Maps)', map_preview:'📌 Lihat di peta',
+    offices_all:'Kantor', nav_open:'🗺️ Navigasi',
+    footer_text:'Asisten Bantuan · Data: Kementerian Kesehatan dan Kesejahteraan.<br>Hubungi <a href="tel:1957">1957</a> untuk bantuan.',
     mob_cat:'Kategori', mob_feat:'Unggulan', mob_hot:'Hotline', mob_search:'Cari',
-    search_title:'🔍 Cari', search_inp_ph:'Masukkan nama bantuan atau kategori…',
+    search_title:'🔍 Cari Bantuan', search_inp_ph:'Masukkan nama bantuan atau kategori…',
     no_result:'Tidak ada bantuan yang sesuai', no_result_m:'Tidak ada hasil',
+    stat_cat:'Kategori', stat_item:'Bantuan', stat_rt:'Langsung', stat_upd:'Pembaruan Data',
+    back_home:'Beranda', back_list:'Kembali', close:'Tutup',
     dist_label:'📏 Sekitar', dist_unit:'km',
     geo_deny:'Izinkan akses lokasi', geo_net:'Tidak dapat mengambil lokasi',
     geo_timeout:'Waktu habis, coba lagi', geo_fallback:'Atau pilih kantor di bawah',
@@ -1235,22 +1326,24 @@ const LANGS = {
     flag:'🇹🇭', label:'TH',
     nav_cat:'หมวดหมู่', nav_feat:'แนะนำ', nav_hot:'สายด่วน',
     hero_badge:'✦ แพลตฟอร์มสวัสดิการสังคมไต้หวัน',
-    hero_h1:'ค้นหา<em>เงินอุดหนุนที่เหมาะกับคุณ</em><br>',
+    hero_h1:'ค้นหา<em>เงินอุดหนุนที่ใช่</em><br>สำหรับคุณ',
     hero_p:'รวบรวมสวัสดิการภาครัฐ — คุณสมบัติ ขั้นตอน เอกสาร และสำนักงานใกล้บ้าน',
-    search_btn:'ค้นหา', search_ph:'ค้นหา เช่น เบี้ยยังชีพผู้สูงอายุ เงินอุดหนุนเด็ก…',
+    search_btn:'ค้นหา', search_ph:'ค้นหา เช่น เบี้ยผู้สูงอายุ เงินอุดหนุนเด็ก…',
     sec_cat:'หมวดหมู่', sec_feat:'สวัสดิการแนะนำ', sec_hot:'สายด่วนสำคัญ',
     tab_intro:'ภาพรวม', tab_proc:'ขั้นตอน', tab_docs:'เอกสาร', tab_map:'สำนักงาน',
     intro_h:'เกี่ยวกับสวัสดิการนี้', proc_h:'ขั้นตอนการยื่น', docs_h:'เอกสารที่ต้องใช้', offices_h:'รายชื่อสำนักงาน',
     locate_btn:'📍 หาสำนักงานใกล้ที่สุด', locate_ok:'✅ พบตำแหน่งของคุณ', locate_retry:'📍 ลองอีกครั้ง',
     locating:'📡 กำลังระบุตำแหน่ง…',
-    map_banner:'💡 หลังระบุตำแหน่ง จะแสดง<strong>สำนักงานยื่นที่ใกล้ที่สุด</strong>พร้อมนำทาง',
-    nearest_label:'📌 สำนักงานใกล้คุณที่สุด (จากใกล้ไปไกล)',
+    map_banner:'💡 แตะปุ่มเพื่อค้นหา<strong>สำนักงานยื่นใกล้ที่สุด</strong>ใน Google Maps',
+    nearest_label:'📌 สำนักงานใกล้ที่สุด',
     nav_go:'🗺️ นำทาง (Google Maps)', map_preview:'📌 ดูบนแผนที่',
-    offices_all:'สำนักงานทั้งหมด', nav_open:'🗺️ นำทาง',
+    offices_all:'สำนักงาน', nav_open:'🗺️ นำทาง',
     footer_text:'ผู้ช่วยสวัสดิการ · ข้อมูล: กระทรวงสาธารณสุขและสวัสดิการ<br>โทร <a href="tel:1957">1957</a>',
     mob_cat:'หมวดหมู่', mob_feat:'แนะนำ', mob_hot:'สายด่วน', mob_search:'ค้นหา',
     search_title:'🔍 ค้นหา', search_inp_ph:'ป้อนชื่อสวัสดิการหรือหมวดหมู่…',
     no_result:'ไม่พบรายการที่ตรงกัน', no_result_m:'ไม่พบผลลัพธ์',
+    stat_cat:'หมวดหมู่', stat_item:'สวัสดิการ', stat_rt:'อัปเดต', stat_upd:'ข้อมูล',
+    back_home:'หน้าหลัก', back_list:'กลับ', close:'ปิด',
     dist_label:'📏 ประมาณ', dist_unit:'กม.',
     geo_deny:'กรุณาอนุญาตเข้าถึงตำแหน่ง', geo_net:'ไม่สามารถรับตำแหน่งได้',
     geo_timeout:'หมดเวลา โปรดลองอีกครั้ง', geo_fallback:'หรือเลือกสำนักงานด้านล่าง',
@@ -1267,14 +1360,16 @@ const LANGS = {
     intro_h:'この補助金について', proc_h:'申請手順', docs_h:'必要書類', offices_h:'窓口一覧',
     locate_btn:'📍 最寄り窓口を探す', locate_ok:'✅ 位置情報取得済み', locate_retry:'📍 再試行',
     locating:'📡 位置情報を取得中…',
-    map_banner:'💡 位置情報取得後、最寄りの<strong>申請窓口</strong>をナビゲーション付きで表示します。',
+    map_banner:'💡 ボタンをタップして Google Maps で<strong>最寄りの申請窓口</strong>を検索。',
     nearest_label:'📌 最寄りの申請窓口（近い順）',
     nav_go:'🗺️ Googleマップで案内', map_preview:'📌 地図でプレビュー',
-    offices_all:'窓口一覧', nav_open:'🗺️ ナビ',
+    offices_all:'窓口', nav_open:'🗺️ ナビ',
     footer_text:'補助金ヘルパー · データ：衛生福利部、各地方政府<br>お問い合わせ：<a href="tel:1957">1957</a>',
     mob_cat:'カテゴリ', mob_feat:'おすすめ', mob_hot:'窓口', mob_search:'検索',
     search_title:'🔍 検索', search_inp_ph:'補助金名またはカテゴリを入力…',
     no_result:'該当する補助金が見つかりません', no_result_m:'結果なし',
+    stat_cat:'カテゴリ', stat_item:'補助金', stat_rt:'リアルタイム', stat_upd:'データ更新',
+    back_home:'ホーム', back_list:'一覧へ戻る', close:'閉じる',
     dist_label:'📏 約', dist_unit:'km',
     geo_deny:'位置情報へのアクセスを許可してください', geo_net:'位置情報を取得できません',
     geo_timeout:'タイムアウト、再試行してください', geo_fallback:'または以下の窓口をタップしてください',
@@ -1284,21 +1379,23 @@ const LANGS = {
     nav_cat:'카테고리', nav_feat:'추천', nav_hot:'상담전화',
     hero_badge:'✦ 대만 사회복지 보조금 플랫폼',
     hero_h1:'나에게 <em>맞는 보조금</em>을<br>찾아보세요',
-    hero_p:'대만 정부의 각종 복지 보조금을 한눈에 — 자격 조건, 신청 절차, 필요 서류, 가까운 기관.',
+    hero_p:'대만 정부의 각종 복지 보조금 — 자격 조건, 신청 절차, 필요 서류, 가까운 기관.',
     search_btn:'검색', search_ph:'보조금 이름 검색. 예: 노인 수당, 육아 보조금…',
     sec_cat:'보조금 카테고리', sec_feat:'추천 보조금', sec_hot:'주요 상담전화',
     tab_intro:'개요', tab_proc:'신청 절차', tab_docs:'필요 서류', tab_map:'담당 기관',
-    intro_h:'이 보조금에 대해', proc_h:'신청 절차', docs_h:'필요 서류', offices_h:'담당 기관 목록',
+    intro_h:'이 보조금에 대해', proc_h:'신청 절차', docs_h:'필요 서류', offices_h:'기관 목록',
     locate_btn:'📍 가장 가까운 기관 찾기', locate_ok:'✅ 위치 확인 완료', locate_retry:'📍 다시 시도',
     locating:'📡 위치 정보를 가져오는 중…',
-    map_banner:'💡 위치 확인 후, 가장 가까운 <strong>신청 기관</strong>과 내비게이션을 안내해드립니다.',
-    nearest_label:'📌 가장 가까운 기관 (가까운 순)',
+    map_banner:'💡 버튼을 탭하여 Google Maps에서 <strong>가장 가까운 신청 기관</strong>을 검색하세요.',
+    nearest_label:'📌 가장 가까운 기관',
     nav_go:'🗺️ Google 지도로 안내', map_preview:'📌 지도 미리보기',
-    offices_all:'기관 목록', nav_open:'🗺️ 안내',
+    offices_all:'기관', nav_open:'🗺️ 안내',
     footer_text:'보조금 도우미 · 자료: 보건복지부, 각 지방 정부<br>문의: <a href="tel:1957">1957</a>',
     mob_cat:'카테고리', mob_feat:'추천', mob_hot:'전화', mob_search:'검색',
     search_title:'🔍 검색', search_inp_ph:'보조금 이름 또는 카테고리 입력…',
     no_result:'해당하는 보조금을 찾을 수 없습니다', no_result_m:'결과 없음',
+    stat_cat:'카테고리', stat_item:'보조금', stat_rt:'실시간', stat_upd:'데이터 업데이트',
+    back_home:'홈', back_list:'목록으로', close:'닫기',
     dist_label:'📏 약', dist_unit:'km',
     geo_deny:'위치 접근 권한을 허용해주세요', geo_net:'위치를 가져올 수 없습니다',
     geo_timeout:'시간 초과, 다시 시도해주세요', geo_fallback:'아래 기관을 탭하여 안내받으세요',
@@ -1349,6 +1446,8 @@ function setLang(lang) {
     const icons = ['🏷️','⭐','📞','🔍'];
     el.textContent = icons[i];
   });
+  // 更新 hotlines
+  renderHotlines(lang);
   // 更新 footer
   const footer = document.querySelector('footer');
   if (footer) footer.innerHTML = L.footer_text;
