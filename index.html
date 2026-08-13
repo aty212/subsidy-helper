@@ -937,22 +937,38 @@ function openDetailModal(idx) {
     <div id="map-nearest"></div>
     <div class="info-block" style="margin-top:12px"><h3>洽辦地點</h3>
     ${item.offices.map(o => {
-      const isPhone = o.addr.startsWith('☎');
-      const isUrl   = o.addr.startsWith('http');
+      const phoneMatch = o.addr.match(/☎\s*([\d\-]+)/);
+      const isUrl      = o.addr.startsWith('http');
+      let actionBtns = '';
+      if (phoneMatch) {
+        // 電話號碼 → tel: 連結，點下去直接跳播號畫面且號碼已填入
+        actionBtns = `<div style="margin-top:8px">
+          <a class="map-nav-btn" href="tel:${phoneMatch[1]}"
+            style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+            📞 撥打 ${phoneMatch[1]}
+          </a></div>`;
+      } else if (isUrl) {
+        actionBtns = `<div style="margin-top:8px">
+          <a class="map-nav-btn" href="${o.addr}" target="_blank" rel="noopener"
+            style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+            🌐 開啟網站
+          </a></div>`;
+      } else {
+        actionBtns = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <a class="map-nav-btn"
+            href="https://maps.google.com/maps/search/${encodeURIComponent(o.name+' 台灣')}"
+            target="_blank" rel="noopener"
+            style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+            🗺️ Google Maps
+          </a>
+        </div>`;
+      }
       return `
       <div class="office-card">
-        <strong>${o.name}</strong><span>${o.addr}</span>
-        ${!isPhone && !isUrl ? `
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <button class="map-nav-btn"
-            onclick="openGoogleMapsSearch('${o.name.replace(/'/g,"\\'")} 台灣')">
-            🔍 在地圖搜尋
-          </button>
-          <button class="map-nav-btn"
-            onclick="openNavigation('${o.name.replace(/'/g,"\\'")}','${o.addr.replace(/'/g,"\\'")}')">
-            🗺️ 開啟導航
-          </button>
-        </div>` : ''}
+        <strong>${o.name}</strong>
+        <span>${o.addr.replace(/☎\s*/,'')}</span>
+        ${actionBtns}
       </div>`;
     }).join('')}</div>`;
 
@@ -1219,9 +1235,19 @@ const HOTLINES = {
 
 function renderHotlines(lang) {
   const list = HOTLINES[lang] || HOTLINES.zh;
-  document.getElementById('hotline-grid').innerHTML = list.map(h =>
-    `<div class="office-card"><strong>${h.name}</strong><span>${h.num}</span></div>`
-  ).join('');
+  document.getElementById('hotline-grid').innerHTML = list.map(h => {
+    // 從 num 抽出號碼，例如 "☎ 1957（全年 24 小時）" → "1957"
+    const m = h.num.match(/☎\s*([\d\-]+)/);
+    const telLink = m
+      ? `<a href="tel:${m[1]}" style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;
+           background:var(--yellow);border-radius:8px;padding:5px 14px;
+           font-size:13px;font-weight:700;color:var(--text);text-decoration:none;
+           -webkit-tap-highlight-color:transparent">
+           📞 ${h.num.replace('☎ ','').replace('☎','')}
+         </a>`
+      : `<span>${h.num}</span>`;
+    return `<div class="office-card"><strong>${h.name}</strong>${telLink}</div>`;
+  }).join('');
 }
 // 初始渲染
 renderHotlines('zh');
