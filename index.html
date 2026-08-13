@@ -7,9 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="補助小幫手" />
   <title>補助小幫手 — 找到適合你的社會補助</title>
-  <!-- iOS 主畫面圖示（黃底+星星，SVG inline base64） -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjVjNTE4Ii8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI5NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNlcmlmIj7inIc8L3RleHQ+PC9zdmc+" />
-  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjZjVjNTE4Ii8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI5NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNlcmlmIj7inIc8L3RleHQ+PC9zdmc+" type="image/svg+xml" />
+  <!-- iOS 主畫面圖示：黃底＋實心金色五角星 -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23f5c518'/%3E%3Cpolygon points='90,28 105,72 152,72 115,98 128,142 90,116 52,142 65,98 28,72 75,72' fill='%23c9960c'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23f5c518'/%3E%3Cpolygon points='90,28 105,72 152,72 115,98 128,142 90,116 52,142 65,98 28,72 75,72' fill='%23c9960c'/%3E%3C/svg%3E" type="image/svg+xml" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -389,7 +389,13 @@
       border: none; background: none;
       font-size: 14px; color: var(--text); cursor: pointer;
       border-bottom: 1px solid var(--border);
+      text-align: left;
       -webkit-tap-highlight-color: transparent;
+    }
+    .lang-picker button .flag-img {
+      width: 22px; height: 16px; object-fit: cover;
+      border-radius: 3px; flex-shrink: 0;
+      border: 1px solid var(--border);
     }
     .lang-picker button:last-child { border-bottom: none; }
     .lang-picker button:hover { background: var(--yellow-soft); }
@@ -504,13 +510,13 @@
     <div class="lang-wrap" id="lang-wrap">
       <button class="lang-btn" id="lang-btn" onclick="toggleLangPicker(event)">🌐 繁中</button>
       <div class="lang-picker" id="lang-picker">
-        <button onclick="setLang('zh')">🇹🇼 繁體中文</button>
-        <button onclick="setLang('en')">🇺🇸 English</button>
-        <button onclick="setLang('vi')">🇻🇳 Tiếng Việt</button>
-        <button onclick="setLang('id')">🇮🇩 Bahasa Indonesia</button>
-        <button onclick="setLang('th')">🇹🇭 ภาษาไทย</button>
-        <button onclick="setLang('ja')">🇯🇵 日本語</button>
-        <button onclick="setLang('ko')">🇰🇷 한국어</button>
+        <button onclick="setLang('zh')"><img class="flag-img" src="https://flagcdn.com/tw.svg" alt="🇹🇼"> 繁體中文</button>
+        <button onclick="setLang('en')"><img class="flag-img" src="https://flagcdn.com/us.svg" alt="🇺🇸"> English</button>
+        <button onclick="setLang('vi')"><img class="flag-img" src="https://flagcdn.com/vn.svg" alt="🇻🇳"> Tiếng Việt</button>
+        <button onclick="setLang('id')"><img class="flag-img" src="https://flagcdn.com/id.svg" alt="🇮🇩"> Bahasa Indonesia</button>
+        <button onclick="setLang('th')"><img class="flag-img" src="https://flagcdn.com/th.svg" alt="🇹🇭"> ภาษาไทย</button>
+        <button onclick="setLang('ja')"><img class="flag-img" src="https://flagcdn.com/jp.svg" alt="🇯🇵"> 日本語</button>
+        <button onclick="setLang('ko')"><img class="flag-img" src="https://flagcdn.com/kr.svg" alt="🇰🇷"> 한국어</button>
       </div>
     </div>
   </div>
